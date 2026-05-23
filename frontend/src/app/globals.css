@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0f111a;
+  --foreground: #f8fafc;
+  --card: #151824;
+  --card-foreground: #f8fafc;
+  --popover: #151824;
+  --popover-foreground: #f8fafc;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #2563eb;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #2e354f;
+  --input: #1e293b;
+  --ring: #8b5cf6;
+  --radius: 0.75rem;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism custom classes */
+.glass-panel {
+  background: rgba(21, 24, 36, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(46, 53, 79, 0.5);
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.2);
+}
+
+/* Glow effects */
+.glow-indigo {
+  box-shadow: 0 0 40px -5px rgba(139, 92, 246, 0.15);
+}
+
+.glow-green {
+  box-shadow: 0 0 40px -5px rgba(34, 197, 94, 0.15);
+}
+
+.glow-red {
+  box-shadow: 0 0 40px -5px rgba(239, 68, 68, 0.15);
+}
+
+/* Animated background gradient */
+.bg-gradient-animate {
+  background: linear-gradient(-45deg, #0f111a, #151824, #120e2e, #090e1f);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
