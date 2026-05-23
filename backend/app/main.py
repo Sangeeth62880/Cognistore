@@ -13,6 +13,7 @@ from app.database import async_session_maker, init_db
 from app.redis_client import redis_client
 from app.routers.features import router as features_router
 from app.routers.nl_features import router as nl_features_router
+from app.routers.datasets import router as datasets_router
 
 # Setup logging
 logging.basicConfig(
@@ -62,6 +63,7 @@ app = FastAPI(
 
 app.include_router(features_router)
 app.include_router(nl_features_router)
+app.include_router(datasets_router)
 
 # CORS configuration
 if settings.ENVIRONMENT == "development":
