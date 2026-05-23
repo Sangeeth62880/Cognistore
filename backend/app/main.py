@@ -16,6 +16,12 @@ from app.routers.nl_features import router as nl_features_router
 from app.routers.datasets import router as datasets_router
 from app.routers.alerts import router as alerts_router
 from app.routers.models import router as models_router
+from app.routers.metrics import router as metrics_router
+
+import time
+import json
+from datetime import datetime, timezone
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # Setup logging
 logging.basicConfig(
@@ -55,6 +61,58 @@ async def lifespan(app: FastAPI):
         logger.error(f"Error during Redis client shutdown: {e}")
 
 
+class LatencyTrackingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.perf_counter()
+        response = await call_next(request)
+        
+        path = request.url.path
+        if "/features/" in path and "/serve" in path:
+            latency_ms = (time.perf_counter() - start_time) * 1000.0
+            try:
+                # Push serving latency to Redis list metrics:latencies
+                await redis_client.client.rpush("metrics:latencies", str(latency_ms))
+                await redis_client.client.ltrim("metrics:latencies", -1000, -1)
+                
+                # Push event logs to Redis list metrics:events (recent serving feed)
+                parts = [p for p in path.split("/") if p]
+                feature_id = "unknown"
+                if len(parts) >= 2:
+                    feature_id = parts[1]
+                
+                # Try to fetch feature name to make visual timeline extremely clean
+                feature_name = "Serve Request"
+                try:
+                    from uuid import UUID
+                    from app.database import async_session_maker, Feature
+                    from sqlalchemy import select
+                    async with async_session_maker() as session:
+                        feat_stmt = select(Feature.name).where(Feature.id == UUID(feature_id))
+                        feat_res = await session.execute(feat_stmt)
+                        feature_name = feat_res.scalar() or "Serve Request"
+                except Exception:
+                    pass
+
+                entity_id = request.query_params.get("entity_id", "unknown")
+                
+                event_data = {
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "feature_id": feature_id,
+                    "feature_name": feature_name,
+                    "entity_id": entity_id,
+                    "latency_ms": round(latency_ms, 2),
+                    "status_code": response.status_code,
+                    "source": "db" if latency_ms > 10.0 else "cache",
+                }
+                
+                await redis_client.client.rpush("metrics:events", json.dumps(event_data))
+                await redis_client.client.ltrim("metrics:events", -50, -1)
+            except Exception as redis_err:
+                logging.getLogger("main").error(f"Failed to record telemetry inside custom middleware: {redis_err}")
+                
+        return response
+
+
 app = FastAPI(
     title="Intelligent Feature Store API",
     version="1.0.0",
@@ -68,6 +126,7 @@ app.include_router(nl_features_router)
 app.include_router(datasets_router)
 app.include_router(alerts_router)
 app.include_router(models_router)
+app.include_router(metrics_router)
 
 # CORS configuration
 if settings.ENVIRONMENT == "development":
@@ -87,6 +146,8 @@ else:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+app.add_middleware(LatencyTrackingMiddleware)
 
 
 # Custom Global Error Handlers

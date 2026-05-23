@@ -36,6 +36,10 @@ class FeatureService:
                 cached_data = await redis_client.get(redis_key)
                 if cached_data:
                     parsed = json.loads(cached_data)
+                    try:
+                        await redis_client.client.incr("metrics:cache_hits")
+                    except Exception as redis_metrics_err:
+                        logger.warning(f"Failed to increment cache hits metric: {redis_metrics_err}")
                     latency_ms = (time.perf_counter() - start_time) * 1000.0
                     return {
                         "feature_id": feature_id,
@@ -50,6 +54,10 @@ class FeatureService:
 
             # 2. Cache miss -> Query DB feature_values
             try:
+                try:
+                    await redis_client.client.incr("metrics:cache_misses")
+                except Exception as redis_metrics_err:
+                    logger.warning(f"Failed to increment cache misses metric: {redis_metrics_err}")
                 stmt = (
                     select(FeatureValue)
                     .where(FeatureValue.feature_id == feature_id)
