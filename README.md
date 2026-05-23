@@ -2,7 +2,19 @@
 
 A production-grade, highly optimized monorepo for managing, cataloging, serving, and validating machine learning features across offline training and real-time serving paths. Equipped with natural language feature synthesis, Pearson schema correlation discovery, Population Stability Index (PSI) drift monitoring, and live WebSocket latency telemetry dashboards.
 
+## 🎨 Premium Light-Theme Interface (Cal.com Style)
+
+Cognistore features a complete visual design inspired by the **Cal.com** design system. All dark gradients, glowing box shadows, and uppercase monospace labels have been replaced by a clean, high-contrast, information-dense light layout:
+
+![Cognistore Telemetry Dashboard](assets/demo_dashboard.png)
+
+*   **Background Canvas**: Pure white (`#ffffff`) with 1px hair borders (`#e5e7eb` / `#f3f4f6`).
+*   **Aesthetics**: Sleek summary stats cards (`#f5f5f5` bg, `12px` border radius), `#f1f5f9` tag badges, and cardless plain text alerts statistics.
+*   **Buttons & Controls**: Sentence-case buttons (`btn-primary` and `btn-secondary`), pure white input boxes, and active left-hairline navigation bars.
+*   **Tables**: Zero outer card outlines, relying solely on clean bottom hairline dividers and `#f9fafb` row hovers.
+
 ---
+
 
 ## 🏗️ System Architecture
 
