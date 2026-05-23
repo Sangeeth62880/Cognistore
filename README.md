@@ -1,4 +1,4 @@
-# Intelligent Feature Store (NeuroStore)
+# Cognistore
 
 A production-grade monorepo for managing, cataloging, serving, and validating machine learning features across offline training and real-time serving paths.
 
