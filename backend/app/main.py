@@ -14,6 +14,8 @@ from app.redis_client import redis_client
 from app.routers.features import router as features_router
 from app.routers.nl_features import router as nl_features_router
 from app.routers.datasets import router as datasets_router
+from app.routers.alerts import router as alerts_router
+from app.routers.models import router as models_router
 
 # Setup logging
 logging.basicConfig(
@@ -64,6 +66,8 @@ app = FastAPI(
 app.include_router(features_router)
 app.include_router(nl_features_router)
 app.include_router(datasets_router)
+app.include_router(alerts_router)
+app.include_router(models_router)
 
 # CORS configuration
 if settings.ENVIRONMENT == "development":

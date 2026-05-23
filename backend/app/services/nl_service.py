@@ -17,6 +17,36 @@ from app.database import Feature
 logger = logging.getLogger(__name__)
 
 
+def build_synthetic_df(code: str) -> pd.DataFrame:
+    # Extract ALL quoted strings that appear after [ or ( or = 
+    # This catches df['col'], groupby('col'), df[df['col']], etc.
+    all_strings = re.findall(r'[\'"]([a-zA-Z_][a-zA-Z0-9_]*)[\'"]', code)
+    
+    # Filter out obvious non-column strings
+    excluded = {'result', 'value', 'success', 'failed', 'pending', 'true', 
+                'false', 'none', 'nan', 'inf', 'json', 'csv', 'utf', 'coerce',
+                'ignore', 'raise', 'inner', 'outer', 'left', 'right', 'index'}
+    
+    cols = [s for s in set(all_strings) if s.lower() not in excluded]
+    
+    if not cols:
+        cols = ['user_id', 'value']
+
+    data = {}
+    for col in cols:
+        col_lower = col.lower()
+        if any(x in col_lower for x in ['id', 'user', 'customer', 'entity', 'key']):
+            data[col] = ['user_1', 'user_2', 'user_3', 'user_1', 'user_2']
+        elif any(x in col_lower for x in ['status', 'type', 'category', 'state', 'label']):
+            data[col] = ['success', 'failed', 'success', 'pending', 'success']
+        elif any(x in col_lower for x in ['date', 'time', '_at', 'day', 'month']):
+            data[col] = pd.date_range('2024-01-01', periods=5).tolist()
+        else:
+            data[col] = [10.0, 20.0, 30.0, 40.0, 50.0]
+    
+    return pd.DataFrame(data)
+
+
 class NLService:
     @staticmethod
     def get_groq_client() -> AsyncGroq:
@@ -45,6 +75,13 @@ class NLService:
             "The code receives a pandas DataFrame called df and must assign the result to a variable "
             "called result which must be a dict mapping entity_id strings (e.g. 'user_1', 'user_2') to computed values.\n"
             "The code must be safe, efficient, and handle edge cases like empty dataframes, null values, and division by zero.\n\n"
+            "CRITICAL RULES - violating any of these will cause the code to be rejected:\n"
+            "1. Do NOT wrap code in a function. No def statements allowed.\n"
+            "2. The code must run at the top level, not inside any function.\n"
+            "3. You MUST assign to a variable called exactly 'result' at the top level.\n"
+            "4. result must be a dict. Example: result = df.groupby('user_id')['amount'].mean().to_dict()\n"
+            "5. Do not use return statements.\n"
+            "6. The variable 'result' must be assigned directly, not returned from a function.\n\n"
             "Return ONLY a JSON object with these exact keys:\n"
             "- computation_code (string, the Python code)\n"
             "- feature_name (string, snake_case, max 50 chars)\n"
@@ -126,6 +163,13 @@ class NLService:
             "The updated code receives a pandas DataFrame called df and must assign the result to a variable "
             "called result which must be a dict mapping entity_id strings to computed values.\n"
             "Ensure the code is safe, robust, and incorporates the improvements asked by the user.\n\n"
+            "CRITICAL RULES - violating any of these will cause the code to be rejected:\n"
+            "1. Do NOT wrap code in a function. No def statements allowed.\n"
+            "2. The code must run at the top level, not inside any function.\n"
+            "3. You MUST assign to a variable called exactly 'result' at the top level.\n"
+            "4. result must be a dict. Example: result = df.groupby('user_id')['amount'].mean().to_dict()\n"
+            "5. Do not use return statements.\n"
+            "6. The variable 'result' must be assigned directly, not returned from a function.\n\n"
             "Return ONLY a JSON object with these exact keys:\n"
             "- computation_code (string, the improved Python code)\n"
             "- description (string, updated description of what the feature tracks, if feedback alters it)\n"
@@ -186,26 +230,8 @@ class NLService:
         Generates a small synthetic DataFrame and dry-runs the computation code
         in a safe namespace to ensure no runtime errors occur.
         """
-        # extract all df['col'] and df["col"] references
-        cols = re.findall(r"df\[[\'\"](\w+)[\'\"]\]", code)
-        cols = list(set(cols))
-        
-        data = {}
-        for col in cols:
-            if any(x in col.lower() for x in ['id', 'user', 'customer', 'entity']):
-                # Never null - these are entity identifiers
-                data[col] = ['user_1', 'user_2', 'user_3', 'user_1', 'user_2']
-            elif any(x in col.lower() for x in ['status', 'type', 'category', 'state']):
-                # Never null - categorical
-                data[col] = ['success', 'failed', 'success', 'pending', 'success']
-            elif any(x in col.lower() for x in ['date', 'time', 'at']):
-                data[col] = pd.date_range('2024-01-01', periods=5).tolist()
-            else:
-                # Numeric - include some nulls to test null handling
-                data[col] = [10.0, None, 30.0, None, 50.0]
-        
         try:
-            df = pd.DataFrame(data)
+            df = build_synthetic_df(code)
         except Exception as e:
             raise ValueError(f"Failed to assemble dry-run synthetic DataFrame: {str(e)}")
 
