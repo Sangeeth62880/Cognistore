@@ -50,30 +50,29 @@ export default function HealthPage() {
   const redisOk = health?.redis_connected ?? false;
 
   return (
-    <div className="space-y-6 max-w-full mx-auto font-sans">
-      
+    <div className="space-y-6 max-w-full mx-auto font-sans bg-white">
       {/* Top Header Section */}
-      <div className="flex flex-row items-center justify-between border-b border-[#1f1f1f] pb-4">
+      <div className="flex flex-row items-center justify-between border-b border-[#e5e7eb] pb-4">
         <div className="space-y-1">
-          <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider block">
-            SYSTEM DIAGNOSTICS & INFRASTRUCTURE HEALTH
-          </span>
-          <p className="text-[13px] text-[#666666] leading-normal max-w-xl">
+          <h1 className="text-[22px] font-semibold tracking-tight text-[#111111] font-sans">
+            Health Status
+          </h1>
+          <p className="text-[14px] text-[#6b7280] leading-normal max-w-xl font-sans mt-1">
             Real-time status monitors for backend services, registry databases, and Upstash Redis clusters.
           </p>
         </div>
         <button
           onClick={fetchHealth}
           disabled={loading}
-          className="px-3 py-1.5 text-xs font-mono border border-[#1f1f1f] bg-transparent text-[#e8e8e8] rounded-[4px] hover:bg-[#111111] hover:border-[#666666] transition-colors duration-150"
+          className="btn-secondary text-xs"
         >
-          {loading ? "CHECKING..." : "RUN DIAGNOSTIC"}
+          {loading ? "Checking..." : "Run diagnostic"}
         </button>
       </div>
 
       {error && (
-        <div className="rounded-[4px] border border-[#dc2626] bg-[#dc2626]/5 p-4 text-[12px] font-mono text-[#dc2626]">
-          [ERROR] Connection failure: {error}
+        <div className="rounded-lg border border-[#ef4444] bg-[#ef4444]/5 p-4 text-[12px] font-mono text-[#ef4444]">
+          [Error] Connection failure: {error}
         </div>
       )}
 
@@ -81,110 +80,117 @@ export default function HealthPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* Service 1: API BACKEND */}
-        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#1f1f1f] pb-2">
-            <span className="text-[11px] font-mono font-bold text-[#666666] uppercase tracking-wider">
-              API BACKEND GATEWAY
+        <div className="bg-[#f5f5f5] border border-[#e5e7eb] rounded-[12px] p-5 space-y-4 shadow-none">
+          <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-2">
+            <span className="text-[14px] font-semibold text-[#111111] font-sans">
+              API Backend Gateway
             </span>
             <div className="flex items-center gap-1.5">
-              <span className={`h-1.5 w-1.5 rounded-full ${health ? "bg-[#16a34a]" : "bg-[#dc2626]"}`} />
-              <span className="text-[9px] font-mono text-[#666666] font-bold uppercase">
-                {health ? "ONLINE" : "OFFLINE"}
+              <span className={`h-1.5 w-1.5 rounded-full ${health ? "bg-[#10b981]" : "bg-[#ef4444]"}`} />
+              <span className="text-xs text-[#6b7280] font-sans">
+                {health ? "Online" : "Offline"}
               </span>
             </div>
           </div>
           
-          <div className="space-y-1.5 text-[11px] font-mono text-[#666666]">
+          <div className="space-y-1.5 text-[13px] text-[#374151] font-sans">
             <div className="flex justify-between">
-              <span>ENDPOINT:</span>
-              <span className="text-[#e8e8e8]">/health</span>
+              <span className="text-[#6b7280]">Endpoint:</span>
+              <span className="text-[#111111] font-semibold">/health</span>
             </div>
             <div className="flex justify-between">
-              <span>ENV:</span>
-              <span className="text-[#e8e8e8] uppercase">{health?.environment || "unknown"}</span>
+              <span className="text-[#6b7280]">Environment:</span>
+              <span className="text-[#111111] font-semibold uppercase">{health?.environment || "unknown"}</span>
             </div>
             <div className="flex justify-between">
-              <span>HEALTH:</span>
-              <span className={health ? "text-[#16a34a] font-bold" : "text-[#dc2626] font-bold"}>
-                {health ? "OPERATIONAL" : "UNREACHABLE"}
+              <span className="text-[#6b7280]">Status:</span>
+              <span className={health ? "text-[#10b981] font-bold" : "text-[#ef4444] font-bold"}>
+                {health ? "Operational" : "Unreachable"}
               </span>
             </div>
           </div>
         </div>
 
         {/* Service 2: POSTGRESQL DB */}
-        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#1f1f1f] pb-2">
-            <span className="text-[11px] font-mono font-bold text-[#666666] uppercase tracking-wider">
-              POSTGRESQL REGISTRY
+        <div className="bg-[#f5f5f5] border border-[#e5e7eb] rounded-[12px] p-5 space-y-4 shadow-none">
+          <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-2">
+            <span className="text-[14px] font-semibold text-[#111111] font-sans">
+              PostgreSQL Registry
             </span>
             <div className="flex items-center gap-1.5">
-              <span className={`h-1.5 w-1.5 rounded-full ${dbOk ? "bg-[#16a34a]" : "bg-[#dc2626]"}`} />
-              <span className="text-[9px] font-mono text-[#666666] font-bold uppercase">
-                {dbOk ? "CONNECTED" : "DISCONNECTED"}
+              <span className={`h-1.5 w-1.5 rounded-full ${dbOk ? "bg-[#10b981]" : "bg-[#ef4444]"}`} />
+              <span className="text-xs text-[#6b7280] font-sans">
+                {dbOk ? "Connected" : "Disconnected"}
               </span>
             </div>
           </div>
           
-          <div className="space-y-1.5 text-[11px] font-mono text-[#666666]">
+          <div className="space-y-1.5 text-[13px] text-[#374151] font-sans">
             <div className="flex justify-between">
-              <span>DRIVER:</span>
-              <span className="text-[#e8e8e8]">asyncpg (SQLAlchemy)</span>
+              <span className="text-[#6b7280]">Driver:</span>
+              <span className="text-[#111111] font-semibold">asyncpg</span>
             </div>
             <div className="flex justify-between">
-              <span>HOST:</span>
-              <span className="text-[#e8e8e8]">db.supabase.co</span>
+              <span className="text-[#6b7280]">Host:</span>
+              <span className="text-[#111111] font-semibold">db.supabase.co</span>
             </div>
             <div className="flex justify-between">
-              <span>CONNECTION:</span>
-              <span className={dbOk ? "text-[#16a34a] font-bold" : "text-[#dc2626] font-bold"}>
-                {dbOk ? "ESTABLISHED" : "FAILURE"}
+              <span className="text-[#6b7280]">Connection:</span>
+              <span className={dbOk ? "text-[#10b981] font-bold" : "text-[#ef4444] font-bold"}>
+                {dbOk ? "Established" : "Failure"}
               </span>
             </div>
           </div>
         </div>
 
         {/* Service 3: REDIS CACHE */}
-        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-[#1f1f1f] pb-2">
-            <span className="text-[11px] font-mono font-bold text-[#666666] uppercase tracking-wider">
-              REDIS SERVING CACHE
+        <div className="bg-[#f5f5f5] border border-[#e5e7eb] rounded-[12px] p-5 space-y-4 shadow-none">
+          <div className="flex items-center justify-between border-b border-[#e5e7eb] pb-2">
+            <span className="text-[14px] font-semibold text-[#111111] font-sans">
+              Redis Serving Cache
             </span>
             <div className="flex items-center gap-1.5">
-              <span className={`h-1.5 w-1.5 rounded-full ${redisOk ? "bg-[#16a34a]" : "bg-[#dc2626]"}`} />
-              <span className="text-[9px] font-mono text-[#666666] font-bold uppercase">
-                {redisOk ? "CONNECTED" : "DISCONNECTED"}
+              <span className={`h-1.5 w-1.5 rounded-full ${redisOk ? "bg-[#10b981]" : "bg-[#ef4444]"}`} />
+              <span className="text-xs text-[#6b7280] font-sans">
+                {redisOk ? "Connected" : "Disconnected"}
               </span>
             </div>
           </div>
           
-          <div className="space-y-1.5 text-[11px] font-mono text-[#666666]">
+          <div className="space-y-1.5 text-[13px] text-[#374151] font-sans">
             <div className="flex justify-between">
-              <span>LIBRARY:</span>
-              <span className="text-[#e8e8e8]">redis.asyncio</span>
+              <span className="text-[#6b7280]">Library:</span>
+              <span className="text-[#111111] font-semibold">redis.asyncio</span>
             </div>
             <div className="flex justify-between">
-              <span>HOST:</span>
-              <span className="text-[#e8e8e8]">upstash.io (caching)</span>
+              <span className="text-[#6b7280]">Host:</span>
+              <span className="text-[#111111] font-semibold">upstash.io</span>
             </div>
             <div className="flex justify-between">
-              <span>CONNECTION:</span>
-              <span className={redisOk ? "text-[#16a34a] font-bold" : "text-[#dc2626] font-bold"}>
-                {redisOk ? "ESTABLISHED" : "FAILURE"}
+              <span className="text-[#6b7280]">Connection:</span>
+              <span className={redisOk ? "text-[#10b981] font-bold" : "text-[#ef4444] font-bold"}>
+                {redisOk ? "Established" : "Failure"}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Diagnostics Verification Footer Info */}
-      {!loading && health && (
-        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 text-[11px] font-mono text-[#666666] flex flex-row items-center justify-between">
-          <span>MONITOR REFRESHED TIMELINE: {lastRefreshed || "JUST NOW"}</span>
-          <span className={health.status === "healthy" ? "text-[#16a34a]" : "text-[#dc2626]"}>
-            STATUS REPORT: {health.status.toUpperCase()}
+      {/* Overall status line below */}
+      {!loading && health && health.status === "healthy" && dbOk && redisOk ? (
+        <div className="pt-8 text-center">
+          <span className="text-[#10b981] font-sans font-semibold text-[15px] inline-flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#10b981] animate-pulse" /> All Systems Operational
           </span>
         </div>
+      ) : (
+        !loading && (
+          <div className="pt-8 text-center">
+            <span className="text-[#ef4444] font-sans font-semibold text-[15px] inline-flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-[#ef4444] animate-pulse" /> System Degradation Detected
+            </span>
+          </div>
+        )
       )}
     </div>
   );

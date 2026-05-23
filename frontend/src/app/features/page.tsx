@@ -73,12 +73,12 @@ export default function FeaturesPage() {
     <div className="space-y-6 max-w-full mx-auto font-sans">
       
       {/* Top Header Section */}
-      <div className="flex flex-row items-center justify-between border-b border-[#1f1f1f] pb-4">
+      <div className="flex flex-row items-center justify-between border-b border-[#e5e7eb] pb-4">
         <div className="space-y-1">
-          <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider block">
-            FEATURE STORE REGISTRY
-          </span>
-          <p className="text-[13px] text-[#666666] leading-normal max-w-xl">
+          <h1 className="text-[22px] font-semibold tracking-tight text-[#111111] font-sans">
+            Features
+          </h1>
+          <p className="text-[14px] text-[#6b7280] leading-normal max-w-xl font-sans">
             Register and serve machine learning features across offline training and online prediction stores.
           </p>
         </div>
@@ -87,14 +87,14 @@ export default function FeaturesPage() {
           <button
             onClick={fetchFeatures}
             disabled={loading}
-            className="px-3 py-1.5 text-xs font-mono border border-[#1f1f1f] bg-transparent text-[#e8e8e8] rounded-[4px] hover:bg-[#111111] hover:border-[#666666] transition-colors duration-150"
+            className="btn-secondary"
           >
-            {loading ? "SYNCING..." : "SYNC REGISTRY"}
+            {loading ? "Syncing..." : "Sync registry"}
           </button>
           
           <Link href="/features/new">
-            <button className="px-3 py-1.5 text-xs font-mono bg-[#2563eb] text-white rounded-[4px] hover:bg-[#2563eb]/90 transition-colors duration-150">
-              CREATE FEATURE
+            <button className="btn-primary">
+              Create feature
             </button>
           </Link>
         </div>
@@ -102,8 +102,8 @@ export default function FeaturesPage() {
 
       {/* Error Panel */}
       {error && (
-        <div className="rounded-[4px] border border-[#dc2626] bg-[#dc2626]/5 p-4 text-[12px] font-mono text-[#dc2626]">
-          [ERROR] Connection failure: {error}
+        <div className="rounded-lg border border-[#ef4444] bg-[#ef4444]/5 p-4 text-[12px] font-mono text-[#ef4444]">
+          [Error] Connection failure: {error}
         </div>
       )}
 
@@ -114,33 +114,33 @@ export default function FeaturesPage() {
           placeholder="Filter features by name, entity, tags..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 px-3 py-1.5 text-xs bg-[#111111] border border-[#1f1f1f] rounded-[4px] outline-none text-[#e8e8e8] font-mono focus:border-[#2563eb] placeholder:text-[#444444]"
+          className="search-input flex-1"
         />
       </div>
 
       {/* Main Table Container */}
-      <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] overflow-hidden">
+      <div className="w-full overflow-x-auto">
         <table className="dev-table">
           <thead>
             <tr>
-              <th className="w-[35%]">Feature Name</th>
-              <th className="w-[30%]">Description</th>
-              <th className="w-[12%]">Entity</th>
-              <th className="w-[15%]">Tags</th>
-              <th className="w-[8%]">Version</th>
+              <th className="w-[35%] font-sans">Feature name</th>
+              <th className="w-[30%] font-sans">Description</th>
+              <th className="w-[12%] font-sans">Entity</th>
+              <th className="w-[15%] font-sans">Tags</th>
+              <th className="w-[8%] font-sans">Version</th>
             </tr>
           </thead>
           <tbody>
             {loading && features.length === 0 ? (
               <tr>
-                <td colSpan={5} className="p-12 text-center text-[#666666] font-mono">
-                  RETRIEVING REGISTERED SCHEMAS...
+                <td colSpan={5} className="p-12 text-center text-[#6b7280] font-sans text-sm">
+                  Retrieving registered schemas...
                 </td>
               </tr>
             ) : filteredFeatures.length === 0 ? (
               <tr>
-                <td colSpan={5} className="p-12 text-center text-[#444444] font-mono">
-                  NO FEATURE SCHEMAS FOUND IN REGISTRY.
+                <td colSpan={5} className="p-12 text-center text-[#6b7280] font-sans text-sm">
+                  No feature schemas found in registry.
                 </td>
               </tr>
             ) : (
@@ -148,25 +148,25 @@ export default function FeaturesPage() {
                 const tags = getTagsList(feat.tags);
                 return (
                   <tr key={feat.id}>
-                    <td className="font-mono text-[#e8e8e8] font-semibold">{feat.name}</td>
-                    <td className="text-[#666666] text-xs leading-normal">{feat.description || "No description provided."}</td>
-                    <td className="font-mono text-[#a3e635] text-[11px] uppercase">{feat.entity_type}</td>
+                    <td className="font-sans text-[#111111] font-semibold text-sm">{feat.name}</td>
+                    <td className="font-sans text-[#374151] text-sm leading-normal">{feat.description || "No description provided."}</td>
+                    <td className="font-sans text-[#374151] text-sm">{feat.entity_type}</td>
                     <td>
                       <div className="flex flex-wrap gap-1">
                         {tags.map((tag) => (
                           <span
                             key={tag}
-                            className="inline-flex items-center px-1.5 py-0.5 rounded-[2px] bg-[#161616] border border-[#1f1f1f] text-[9px] font-mono text-[#666666] uppercase"
+                            className="tag-pill"
                           >
                             {tag}
                           </span>
                         ))}
                         {tags.length === 0 && (
-                          <span className="text-[10px] text-[#444444] font-mono italic">NONE</span>
+                          <span className="text-[12px] text-[#9ca3af] font-sans italic">None</span>
                         )}
                       </div>
                     </td>
-                    <td className="font-mono text-[#a3e635] text-[11px] font-semibold">
+                    <td className="font-mono text-[#111111] text-[13px] font-medium">
                       v{feat.version}.0
                     </td>
                   </tr>
@@ -177,5 +177,6 @@ export default function FeaturesPage() {
         </table>
       </div>
     </div>
+
   );
 }

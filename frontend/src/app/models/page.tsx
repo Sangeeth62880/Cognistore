@@ -79,39 +79,39 @@ export default function ModelsPage() {
     <div className="space-y-6 max-w-full mx-auto font-sans">
       
       {/* Top Header Section */}
-      <div className="flex flex-row items-center justify-between border-b border-[#1f1f1f] pb-4">
+      <div className="flex flex-row items-center justify-between border-b border-[#e5e7eb] pb-4">
         <div className="space-y-1">
-          <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider block">
-            MODEL DEPLOYMENT REGISTRY
-          </span>
-          <p className="text-[13px] text-[#666666] leading-normal max-w-xl">
+          <h1 className="text-[22px] font-semibold tracking-tight text-[#111111] font-sans">
+            Models
+          </h1>
+          <p className="text-[14px] text-[#6b7280] leading-normal max-w-xl font-sans mt-1">
             Monitor and audit machine learning schemas feeding from the feature store. Map lineage definitions directly.
           </p>
         </div>
 
         {/* Minimalist Tabs (clean layout, text accent only) */}
-        <div className="flex items-center gap-4 shrink-0 font-mono text-[12px] font-semibold border-l border-[#1f1f1f] pl-4">
+        <div className="flex items-center gap-4 shrink-0 font-sans text-[14px] font-medium border-l border-[#e5e7eb] pl-4">
           <button
             onClick={() => setActiveTab("registry")}
             className={`pb-1 transition-colors duration-150 relative ${
-              activeTab === "registry" ? "text-[#e8e8e8]" : "text-[#666666] hover:text-[#e8e8e8]"
+              activeTab === "registry" ? "text-[#111111]" : "text-[#6b7280] hover:text-[#111111]"
             }`}
           >
-            REGISTRY LIST
+            Registry list
             {activeTab === "registry" && (
-              <div className="absolute left-0 right-0 bottom-[-5px] h-[2px] bg-[#2563eb]" />
+              <div className="absolute left-0 right-0 bottom-[-5px] h-[2px] bg-[#111111]" />
             )}
           </button>
           
           <button
             onClick={() => setActiveTab("register")}
             className={`pb-1 transition-colors duration-150 relative ${
-              activeTab === "register" ? "text-[#e8e8e8]" : "text-[#666666] hover:text-[#e8e8e8]"
+              activeTab === "register" ? "text-[#111111]" : "text-[#6b7280] hover:text-[#111111]"
             }`}
           >
-            LOG NEW MODEL
+            Log new model
             {activeTab === "register" && (
-              <div className="absolute left-0 right-0 bottom-[-5px] h-[2px] bg-[#2563eb]" />
+              <div className="absolute left-0 right-0 bottom-[-5px] h-[2px] bg-[#111111]" />
             )}
           </button>
         </div>
@@ -130,34 +130,34 @@ export default function ModelsPage() {
         <div className="space-y-4">
           
           {error && (
-            <div className="rounded-[4px] border border-[#dc2626] bg-[#dc2626]/5 p-4 text-[12px] font-mono text-[#dc2626]">
-              [ERROR] Sync failure: {error}
+            <div className="rounded-lg border border-[#ef4444] bg-[#ef4444]/5 p-4 text-[12px] font-mono text-[#ef4444]">
+              [Error] Sync failure: {error}
             </div>
           )}
 
           {/* Table Container */}
-          <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] overflow-hidden">
+          <div className="w-full overflow-x-auto">
             <table className="dev-table">
               <thead>
                 <tr>
-                  <th className="w-[30%]">Model Name</th>
-                  <th className="w-[12%]">Version</th>
-                  <th className="w-[20%]">Linked Features</th>
-                  <th className="w-[23%]">MLflow Run ID</th>
-                  <th className="w-[15%]">Registered At</th>
+                  <th className="w-[30%] font-sans">Model name</th>
+                  <th className="w-[12%] font-sans">Version</th>
+                  <th className="w-[20%] font-sans">Linked features</th>
+                  <th className="w-[23%] font-sans">MLflow Run ID</th>
+                  <th className="w-[15%] font-sans">Registered at</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && models.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center text-[#666666] font-mono">
-                      RETRIEVING REGISTERED MODEL SCHEMAS...
+                    <td colSpan={5} className="p-12 text-center text-[#6b7280] font-sans text-sm">
+                      Retrieving registered model schemas...
                     </td>
                   </tr>
                 ) : models.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center text-[#444444] font-mono">
-                      NO MODEL SCHEMAS LOGGED IN REGISTRY.
+                    <td colSpan={5} className="p-12 text-center text-[#6b7280] font-sans text-sm">
+                      No model schemas logged in registry.
                     </td>
                   </tr>
                 ) : (
@@ -171,33 +171,33 @@ export default function ModelsPage() {
                           className="cursor-pointer"
                         >
                           {/* Name */}
-                          <td className="font-mono text-[#e8e8e8] font-bold">
+                          <td className="font-sans text-[#111111] font-semibold text-sm">
                             {model.name}
                           </td>
 
                           {/* Version */}
                           <td>
-                            <span className="font-mono text-[#a3e635] text-[11px]">
+                            <span className="font-mono text-[#111111] text-[13px]">
                               {model.version}
                             </span>
                           </td>
 
                           {/* Linked Features Count */}
-                          <td className="font-mono text-[#e8e8e8] text-[11px]">
-                            {model.features.length} FEATURES BOUND
+                          <td className="font-sans text-[#374151] text-sm">
+                            {model.features.length} features bound
                           </td>
 
                           {/* MLflow Run ID */}
-                          <td className="font-mono text-[#666666] text-[11px]">
+                          <td className="font-mono text-[#2563eb] text-[13px]">
                             {model.mlflow_run_id ? (
-                              <span className="text-[#a3e635]">{model.mlflow_run_id}</span>
+                              <span>{model.mlflow_run_id}</span>
                             ) : (
                               "NO_MLFLOW_LINK"
                             )}
                           </td>
 
                           {/* Registered timestamp */}
-                          <td className="font-mono text-[#666666] text-[11px]">
+                          <td className="font-sans text-[#6b7280] text-xs">
                             {new Date(model.created_at).toLocaleDateString()}
                           </td>
                         </tr>
@@ -207,24 +207,24 @@ export default function ModelsPage() {
                           <tr>
                             <td
                               colSpan={5}
-                              className="p-4 bg-[#161616] border-t border-b border-[#1f1f1f] text-[#666666] font-mono"
+                              className="p-5 bg-[#f8f9fa] border-t border-b border-[#e5e7eb] text-[#374151] font-sans leading-relaxed"
                             >
                               <div className="space-y-2">
-                                <span className="text-[10px] text-[#444444] font-bold uppercase tracking-wider block">
-                                  LINEAGE FEATURE SCHEMAS:
+                                <span className="text-[10px] text-[#6b7280] font-bold uppercase tracking-wider block font-sans">
+                                  Lineage feature schemas:
                                 </span>
                                 <div className="flex flex-col gap-1 pl-2">
                                   {model.features.map((feat) => (
                                     <div
                                       key={feat.feature_id}
-                                      className="text-xs text-[#e8e8e8]"
+                                      className="text-xs text-[#374151]"
                                     >
-                                      &bull; <span className="font-semibold text-[#a3e635]">{feat.feature_name}</span> (ID: <span className="text-[#666666]">{feat.feature_id}</span>)
+                                      &bull; <span className="font-semibold text-[#111111]">{feat.feature_name}</span> (ID: <span className="font-mono text-[#6b7280]">{feat.feature_id}</span>)
                                     </div>
                                   ))}
                                   {model.features.length === 0 && (
-                                    <span className="text-xs text-[#444444] italic">
-                                      NO FEATURES CURRENTLY LINKED TO PIPELINE.
+                                    <span className="text-xs text-[#9ca3af] italic font-sans">
+                                      No features currently linked to pipeline.
                                     </span>
                                   )}
                                 </div>

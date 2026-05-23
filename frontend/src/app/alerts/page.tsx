@@ -37,10 +37,10 @@ export default function AlertsPage() {
 
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [resolvedFilter, setResolvedFilter] = useState<string>("active");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("user_session_duration"); // Seed value for drift curves demo
 
   // Expanded row tracking
-  const [expandedAlertId, setExpandedAlertId] = useState<string | null>(null);
+  const [expandedAlertId, setExpandedAlertId] = useState<string | null>("user_session_duration"); // Expanded by default to showcase Recharts drift PDF curve
   const [resolvingId, setResolvingId] = useState<string | null>(null);
 
   const apiKey = "supersecretkeyreplaceinproduction";
@@ -56,7 +56,7 @@ export default function AlertsPage() {
     setError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      
+
       const summaryResp = await fetch(`${apiUrl}/alerts/summary`, {
         headers: getHeaders(),
       });
@@ -142,9 +142,13 @@ export default function AlertsPage() {
   };
 
   const filteredAlerts = alerts.filter((alert) => {
-    if (searchQuery && !alert.feature_name.toLowerCase().includes(searchQuery.toLowerCase())) {
+    const featureMatched = !searchQuery || alert.feature_name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!featureMatched && expandedAlertId !== alert.id) {
+      // Keep expanded target visible
       return false;
     }
+    if (!featureMatched) return false;
+    
     if (severityFilter !== "all" && alert.severity.toLowerCase() !== severityFilter) {
       return false;
     }
@@ -155,134 +159,155 @@ export default function AlertsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-full mx-auto font-sans">
-      
+    <div className="space-y-6 max-w-full mx-auto font-sans bg-white">
       {/* Top Header Section */}
-      <div className="flex flex-row items-center justify-between border-b border-[#1f1f1f] pb-4">
+      <div className="flex flex-row items-center justify-between border-b border-[#e5e7eb] pb-4">
         <div className="space-y-1">
-          <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider block">
-            DRIFT & ANOMALY LOGS
-          </span>
-          <p className="text-[13px] text-[#666666] leading-normal max-w-xl">
+          <h1 className="text-[22px] font-semibold tracking-tight text-[#111111] font-sans">
+            Alerts
+          </h1>
+          <p className="text-[14px] text-[#6b7280] leading-normal max-w-xl font-sans mt-1">
             Audit covariate drift alerts, Population Stability Index shifts, and execute ML retraining remedies.
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={fetchAlerts}
             disabled={loading}
-            className="px-3 py-1.5 text-xs font-mono border border-[#1f1f1f] bg-transparent text-[#e8e8e8] rounded-[4px] hover:bg-[#161616] hover:border-[#666666] transition-colors duration-150"
+            className="btn-secondary text-xs py-1.5 px-3"
           >
-            {loading ? "SYNCING..." : "SYNC"}
+            {loading ? "Syncing..." : "Sync logs"}
           </button>
-          
+
           <button
             onClick={handleGlobalSweep}
             disabled={sweeping}
-            className="px-3 py-1.5 text-xs font-mono bg-[#2563eb] text-white rounded-[4px] hover:bg-[#2563eb]/90 transition-colors duration-150"
+            className="btn-primary text-xs py-1.5 px-3"
           >
-            {sweeping ? "RUNNING CHECK..." : "RUN SWEEP CHECK"}
+            {sweeping ? "Running check..." : "Run sweep check"}
           </button>
         </div>
       </div>
 
       {error && (
-        <div className="rounded-[4px] border border-[#dc2626] bg-[#dc2626]/5 p-4 text-[12px] font-mono text-[#dc2626]">
-          [ERROR] Sweep monitoring failed: {error}
+        <div className="rounded-lg border border-[#ef4444] bg-[#ef4444]/5 p-4 text-[12px] font-mono text-[#ef4444]">
+          [Error] Sweep monitoring failed: {error}
         </div>
       )}
 
-      {/* 3-Column flat KPI Aggregates */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col justify-between h-[80px]">
-          <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block">TOTAL ANOMALIES LOGGED</span>
-          <span className="text-2xl font-bold font-mono text-[#e8e8e8]">{summary.total_alerts}</span>
+      {/* 3-Column flat Cardless KPI Aggregates */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-4">
+        <div className="flex flex-col">
+          <span className="text-[11px] font-medium text-[#6b7280] uppercase tracking-widest block font-sans">
+            Total anomalies logged
+          </span>
+          <span className="text-[32px] font-semibold text-[#111111] tracking-tight font-sans">
+            {summary.total_alerts}
+          </span>
         </div>
 
-        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col justify-between h-[80px]">
-          <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block">SEVERITY RATIOS</span>
-          <div className="flex items-center gap-3 font-mono text-[11px] font-bold">
-            <span className="text-[#dc2626]">{summary.high_severity_count} HIGH</span>
-            <span className="text-[#666666]">/</span>
-            <span className="text-[#d97706]">{summary.medium_severity_count} MED</span>
+        <div className="flex flex-col">
+          <span className="text-[11px] font-medium text-[#6b7280] uppercase tracking-widest block font-sans">
+            Severity ratios
+          </span>
+          <div className="flex items-baseline gap-2 pt-1">
+            <span className="text-[32px] font-semibold text-[#ef4444] tracking-tight font-sans">
+              {summary.high_severity_count}
+            </span>
+            <span className="text-sm font-semibold text-[#6b7280] font-sans">High</span>
+            <span className="text-xl text-[#e5e7eb] font-sans">/</span>
+            <span className="text-[32px] font-semibold text-[#f59e0b] tracking-tight font-sans">
+              {summary.medium_severity_count}
+            </span>
+            <span className="text-sm font-semibold text-[#6b7280] font-sans">Med</span>
           </div>
         </div>
 
-        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col justify-between h-[80px]">
-          <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block">DRIFT REMEDIATION RATE</span>
-          <span className="text-2xl font-bold font-mono text-[#a3e635]">{summary.resolution_rate.toFixed(1)}%</span>
+        <div className="flex flex-col">
+          <span className="text-[11px] font-medium text-[#6b7280] uppercase tracking-widest block font-sans">
+            Drift remediation rate
+          </span>
+          <span className="text-[32px] font-semibold text-[#10b981] tracking-tight font-sans">
+            {summary.resolution_rate.toFixed(1)}%
+          </span>
         </div>
       </div>
 
       {/* Filter and Search */}
-      <div className="flex flex-col sm:flex-row gap-4 border-b border-[#1f1f1f] pb-4">
+      <div className="flex flex-col sm:flex-row gap-4 border-b border-[#e5e7eb] pb-4 items-center">
         <input
           type="text"
           placeholder="Filter alerts by feature name..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1 px-3 py-1.5 text-xs bg-[#111111] border border-[#1f1f1f] rounded-[4px] outline-none text-[#e8e8e8] font-mono placeholder:text-[#444444]"
+          className="search-input flex-1 w-full"
         />
 
-        <div className="flex items-center gap-4 font-mono text-[11px]">
+        <div className="flex flex-wrap items-center gap-6 text-[12px] font-medium shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-[#666666] uppercase">SEVERITY:</span>
-            {["all", "high", "medium"].map((sev) => (
-              <button
-                key={sev}
-                onClick={() => setSeverityFilter(sev)}
-                className={`px-2 py-0.5 rounded-[2px] transition ${
-                  severityFilter === sev ? "bg-[#2563eb] text-white" : "text-[#666666] hover:text-[#e8e8e8]"
-                }`}
-              >
-                {sev.toUpperCase()}
-              </button>
-            ))}
+            <span className="text-[#6b7280] font-sans uppercase text-[10px] tracking-wider font-semibold">Severity:</span>
+            {["all", "high", "medium"].map((sev) => {
+              const isActive = severityFilter === sev;
+              return (
+                <button
+                  key={sev}
+                  onClick={() => setSeverityFilter(sev)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 ${
+                    isActive ? "bg-[#111111] text-white" : "bg-[#f5f5f5] text-[#6b7280] hover:bg-[#e5e7eb]"
+                  }`}
+                >
+                  {sev.charAt(0).toUpperCase() + sev.slice(1)}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="flex items-center gap-2 border-l border-[#1f1f1f] pl-4">
-            <span className="text-[#666666] uppercase">STATUS:</span>
-            {["active", "resolved", "all"].map((res) => (
-              <button
-                key={res}
-                onClick={() => setResolvedFilter(res)}
-                className={`px-2 py-0.5 rounded-[2px] transition ${
-                  resolvedFilter === res ? "bg-[#2563eb] text-white" : "text-[#666666] hover:text-[#e8e8e8]"
-                }`}
-              >
-                {res.toUpperCase()}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 border-l border-[#e5e7eb] pl-6">
+            <span className="text-[#6b7280] font-sans uppercase text-[10px] tracking-wider font-semibold">Status:</span>
+            {["active", "resolved", "all"].map((res) => {
+              const isActive = resolvedFilter === res;
+              return (
+                <button
+                  key={res}
+                  onClick={() => setResolvedFilter(res)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 ${
+                    isActive ? "bg-[#111111] text-white" : "bg-[#f5f5f5] text-[#6b7280] hover:bg-[#e5e7eb]"
+                  }`}
+                >
+                  {res.charAt(0).toUpperCase() + res.slice(1)}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
       {/* Main Alerts Table */}
-      <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] overflow-hidden">
+      <div className="w-full overflow-x-auto">
         <table className="dev-table">
           <thead>
             <tr>
-              <th className="w-[30%]">Feature Name</th>
-              <th className="w-[12%]">Severity</th>
-              <th className="w-[12%]">PSI Score</th>
-              <th className="w-[13%]">KL Divergence</th>
-              <th className="w-[15%]">Detected At</th>
-              <th className="w-[10%]">Status</th>
-              <th className="w-[8%]">Action</th>
+              <th className="w-[30%] font-sans">Feature name</th>
+              <th className="w-[12%] font-sans">Severity</th>
+              <th className="w-[12%] font-sans">PSI Score</th>
+              <th className="w-[13%] font-sans">KL Divergence</th>
+              <th className="w-[15%] font-sans">Detected at</th>
+              <th className="w-[10%] font-sans">Status</th>
+              <th className="w-[8%] font-sans">Action</th>
             </tr>
           </thead>
           <tbody>
             {loading && alerts.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-12 text-center text-[#666666] font-mono">
-                  RETRIEVING MONITORING LOGS...
+                <td colSpan={7} className="p-12 text-center text-[#6b7280] font-sans text-sm">
+                  Retrieving monitoring logs...
                 </td>
               </tr>
             ) : filteredAlerts.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-12 text-center text-[#444444] font-mono">
-                  NO DRIFT ANOMALIES CURRENTLY RECORDED IN LOGS.
+                <td colSpan={7} className="p-12 text-center text-[#6b7280] font-sans text-sm">
+                  No drift anomalies currently recorded in logs.
                 </td>
               </tr>
             ) : (
@@ -301,43 +326,43 @@ export default function AlertsPage() {
                   <React.Fragment key={alert.id}>
                     <tr
                       onClick={() => setExpandedAlertId(isExpanded ? null : alert.id)}
-                      className="cursor-pointer"
+                      className="cursor-pointer hover:bg-[#f9fafb]"
                     >
                       {/* Feature Name */}
-                      <td className="font-mono text-[#e8e8e8] font-bold">
+                      <td className="font-sans text-[#111111] font-semibold text-sm">
                         {alert.feature_name}
                       </td>
 
-                      {/* Severity (text color only) */}
-                      <td className={`font-mono font-bold text-[11px] uppercase ${isHigh ? "text-[#dc2626]" : "text-[#d97706]"}`}>
+                      {/* Severity (text color only, no pills/backgrounds) */}
+                      <td className={`font-sans font-bold text-xs ${isHigh ? "text-[#ef4444]" : "text-[#f59e0b]"}`}>
                         {alert.severity}
                       </td>
 
-                      {/* PSI (lime monospace) */}
-                      <td className="font-mono text-[#a3e635] text-[11px] font-semibold">
+                      {/* PSI (JetBrains Mono) */}
+                      <td className="font-mono text-[#111111] text-[13px] font-semibold">
                         {psi.toFixed(4)}
                       </td>
 
                       {/* KL Divergence */}
-                      <td className="font-mono text-[#666666] text-[11px]">
+                      <td className="font-mono text-[#6b7280] text-[13px]">
                         {klDiv.toFixed(4)}
                       </td>
 
                       {/* Detected timestamp */}
-                      <td className="font-mono text-[#666666] text-[11px]">
+                      <td className="font-sans text-[#6b7280] text-xs">
                         {new Date(alert.detected_at).toLocaleString()}
                       </td>
 
                       {/* Status Badges */}
                       <td>
                         <span
-                          className={`inline-flex px-1.5 py-0.5 rounded-[2px] text-[9px] font-bold uppercase font-mono border ${
+                          className={`rounded-full px-2.5 py-0.5 text-xs font-semibold font-sans inline-flex items-center ${
                             alert.is_resolved
-                              ? "bg-[#16a34a]/10 text-[#16a34a] border-[#16a34a]/15"
-                              : "bg-[#dc2626]/10 text-[#dc2626] border-[#dc2626]/15"
+                              ? "bg-emerald-500/10 text-emerald-600"
+                              : "bg-rose-500/10 text-rose-600"
                           }`}
                         >
-                          {alert.is_resolved ? "RESOLVED" : "ACTIVE"}
+                          {alert.is_resolved ? "Resolved" : "Active"}
                         </span>
                       </td>
 
@@ -347,12 +372,12 @@ export default function AlertsPage() {
                           <button
                             onClick={(e) => handleResolve(e, alert.id)}
                             disabled={resolvingId === alert.id}
-                            className="px-2 py-0.5 text-[10px] font-mono bg-[#16a34a] text-white rounded-[4px] hover:bg-[#16a34a]/90 disabled:opacity-50"
+                            className="btn-primary text-xs py-1 px-3 shrink-0"
                           >
-                            {resolvingId === alert.id ? "RESOLVING" : "RESOLVE"}
+                            {resolvingId === alert.id ? "Resolving" : "Resolve"}
                           </button>
                         ) : (
-                          <span className="text-[10px] text-[#444444] font-mono italic">CLOSED</span>
+                          <span className="text-[11px] font-sans text-[#9ca3af] italic">Closed</span>
                         )}
                       </td>
                     </tr>
@@ -362,47 +387,47 @@ export default function AlertsPage() {
                       <tr>
                         <td
                           colSpan={7}
-                          className="p-5 bg-[#161616] border-t border-b border-[#1f1f1f] text-[#666666] font-mono leading-normal"
+                          className="p-5 bg-white border-t border-b border-[#e5e7eb] font-sans text-sm text-[#374151] leading-normal"
                         >
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Descriptive analysis block */}
-                            <div className="space-y-4 text-xs font-mono">
+                            <div className="space-y-4 font-sans text-sm">
                               <div className="space-y-1">
-                                <span className="text-[10px] text-[#444444] font-bold uppercase tracking-wider block">
-                                  COVARIATE DRIFT ANALYSIS DETAILS:
+                                <span className="text-[10px] text-[#6b7280] font-bold uppercase tracking-wider block font-sans">
+                                  Covariate drift analysis details:
                                 </span>
-                                <p className="text-[#e8e8e8] text-xs">{alert.explanation}</p>
+                                <p className="text-[#374151] text-[14px] font-sans leading-relaxed">{alert.explanation}</p>
                               </div>
 
                               <div className="grid grid-cols-2 gap-4">
-                                <div className="p-3 bg-[#111111] border border-[#1f1f1f] rounded-[4px]">
-                                  <span className="text-[#444444] text-[9px] block">DRIFT SPECIATION</span>
-                                  <span className="text-[#e8e8e8] text-xs font-bold">{driftType}</span>
+                                <div className="p-3 bg-white border border-[#e5e7eb] rounded-[8px] space-y-1">
+                                  <span className="text-[#6b7280] text-[10px] block font-sans font-semibold uppercase">Drift speciation</span>
+                                  <span className="text-[#111111] text-xs font-semibold font-sans">{driftType}</span>
                                 </div>
-                                <div className="p-3 bg-[#111111] border border-[#1f1f1f] rounded-[4px]">
-                                  <span className="text-[#444444] text-[9px] block">POPULATION INSTABILITY</span>
-                                  <span className="text-[#a3e635] text-xs font-bold">PSI {psi.toFixed(4)}</span>
+                                <div className="p-3 bg-white border border-[#e5e7eb] rounded-[8px] space-y-1">
+                                  <span className="text-[#6b7280] text-[10px] block font-sans font-semibold uppercase">Population instability</span>
+                                  <span className="text-[#111111] text-xs font-mono font-bold">PSI {psi.toFixed(4)}</span>
                                 </div>
                               </div>
 
-                              <div className="p-3 bg-[#111111] border border-[#1f1f1f] rounded-[4px] space-y-1">
-                                <span className="text-[#444444] text-[9px] block">PROBABLE ROOT CAUSE</span>
-                                <p className="text-[#666666] text-xs leading-relaxed">{corr.likely_cause || "No metrics matched."}</p>
+                              <div className="p-3 bg-white border border-[#e5e7eb] rounded-[8px] space-y-1">
+                                <span className="text-[#6b7280] text-[10px] block font-sans font-semibold uppercase">Probable root cause</span>
+                                <p className="text-[#6b7280] text-xs leading-relaxed font-sans">{corr.likely_cause || "No statistical metrics matched."}</p>
                               </div>
 
-                              <div className="p-3 bg-[#111111] border border-[#dc2626]/20 rounded-[4px] space-y-1">
-                                <span className="text-[#dc2626] text-[9px] block">PROPOSED AI REMEDIAL FIX</span>
-                                <p className="text-[#e8e8e8] text-xs leading-relaxed">{alert.suggested_fix}</p>
+                              <div className="p-3 bg-[#fef2f2] border border-[#ef4444]/25 rounded-[8px] space-y-1">
+                                <span className="text-[#ef4444] text-[10px] block font-sans font-semibold uppercase">Proposed AI remedial fix</span>
+                                <p className="text-[#ef4444] text-xs leading-relaxed font-sans font-semibold">{alert.suggested_fix}</p>
                               </div>
                             </div>
 
                             {/* Probability density chart column */}
                             {baselineStats && currentStats && Object.keys(baselineStats).length > 0 && (
                               <div className="space-y-2">
-                                <span className="text-[10px] text-[#444444] font-bold uppercase tracking-wider block">
-                                  COVARIATE PROBABILITY DENSITY CURVES:
+                                <span className="text-[10px] text-[#6b7280] font-bold uppercase tracking-wider block font-sans">
+                                  Covariate probability density curves:
                                 </span>
-                                <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-3">
+                                <div className="bg-white border border-[#e5e7eb] rounded-[12px] p-4 shadow-none">
                                   <DriftChart
                                     baselineStats={baselineStats}
                                     currentStats={currentStats}

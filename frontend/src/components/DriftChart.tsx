@@ -72,65 +72,69 @@ export default function DriftChart({ baselineStats, currentStats, psi }: DriftCh
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-sans bg-white">
       {/* PSI Header Banner */}
-      <div className="flex items-center justify-between p-4 bg-slate-950/60 rounded-xl border border-slate-850">
+      <div className="flex items-center justify-between p-4 bg-[#f8f9fa] rounded-[8px] border border-[#e5e7eb]">
         <div className="space-y-1">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Stability Metric</span>
-          <span className="text-sm font-bold text-slate-200">Population Stability Index (PSI)</span>
+          <span className="text-[10px] font-medium text-[#6b7280] uppercase tracking-wider block font-sans">Stability Metric</span>
+          <span className="text-sm font-semibold text-[#111111] font-sans">Population Stability Index (PSI)</span>
         </div>
         <div className="text-right">
-          <span className="text-xs text-slate-400 font-mono block">PSI score</span>
-          <span className={`text-md font-bold font-mono ${psi > 0.4 ? "text-rose-400" : "text-amber-400"}`}>
+          <span className="text-[11px] text-[#6b7280] font-sans block">PSI score</span>
+          <span className={`text-md font-mono font-bold ${psi > 0.4 ? "text-[#ef4444]" : "text-[#f59e0b]"}`}>
             {psi.toFixed(4)}
           </span>
         </div>
       </div>
 
       {/* Recharts Curve Container */}
-      <div className="h-[220px] w-full bg-slate-950/20 border border-slate-900 rounded-xl p-4">
+      <div className="h-[220px] w-full bg-white border border-[#e5e7eb] rounded-[12px] p-4 shadow-none">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
             <defs>
               <linearGradient id="colorBaseline" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#0891b2" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#0891b2" stopOpacity={0.0} />
+                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.08} />
+                <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
               </linearGradient>
               <linearGradient id="colorCurrent" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.0} />
+                <stop offset="5%" stopColor="#ef4444" stopOpacity={0.08} />
+                <stop offset="95%" stopColor="#ef4444" stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.3} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="valueBucket"
-              stroke="#64748b"
+              stroke="#9ca3af"
               fontSize={10}
               tickLine={false}
               axisLine={false}
+              className="font-mono"
             />
             <YAxis
-              stroke="#64748b"
+              stroke="#9ca3af"
               fontSize={10}
               tickLine={false}
               axisLine={false}
+              className="font-mono"
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#020617",
-                borderColor: "#1e293b",
+                backgroundColor: "#ffffff",
+                borderColor: "#e5e7eb",
                 borderRadius: "8px",
                 fontSize: "11px",
+                fontFamily: "sans-serif",
+                boxShadow: "none",
               }}
               itemStyle={{ fontSize: "11px" }}
-              labelStyle={{ fontSize: "11px", fontWeight: "bold", color: "#94a3b8" }}
+              labelStyle={{ fontSize: "11px", fontWeight: "bold", color: "#6b7280" }}
               labelFormatter={(value: any) => `Value bucket: ${value}`}
             />
-            <Legend verticalAlign="top" height={36} iconSize={10} wrapperStyle={{ fontSize: "11px" }} />
+            <Legend verticalAlign="top" height={36} iconSize={10} wrapperStyle={{ fontSize: "11px", fontFamily: "sans-serif" }} />
             <Area
               type="monotone"
               dataKey="Baseline (7d ago)"
-              stroke="#0891b2"
+              stroke="#2563eb"
               strokeWidth={1.5}
               fillOpacity={1}
               fill="url(#colorBaseline)"
@@ -138,7 +142,7 @@ export default function DriftChart({ baselineStats, currentStats, psi }: DriftCh
             <Area
               type="monotone"
               dataKey="Current (24h)"
-              stroke="#f43f5e"
+              stroke="#ef4444"
               strokeWidth={1.5}
               fillOpacity={1}
               fill="url(#colorCurrent)"

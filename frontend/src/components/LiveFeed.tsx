@@ -32,14 +32,14 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
 
   const connectionIndicator = () => {
     const statuses: Record<string, { label: string; bg: string }> = {
-      connected: { label: "CONNECTED", bg: "bg-[#16a34a]" },
-      connecting: { label: "CONNECTING", bg: "bg-[#d97706]" },
-      disconnected: { label: "OFFLINE", bg: "bg-[#dc2626]" },
+      connected: { label: "CONNECTED", bg: "bg-[#10b981]" },
+      connecting: { label: "CONNECTING", bg: "bg-[#f59e0b]" },
+      disconnected: { label: "OFFLINE", bg: "bg-[#ef4444]" },
     };
     const current = statuses[connectionStatus] || statuses.disconnected;
 
     return (
-      <div className="flex items-center gap-1.5 font-mono text-[9px] text-[#666666] tracking-wider">
+      <div className="flex items-center gap-1.5 font-sans text-[11px] text-[#6b7280]">
         <span className={`h-1.5 w-1.5 rounded-full ${current.bg}`} />
         <span>{current.label}</span>
       </div>
@@ -50,12 +50,12 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col h-[350px] font-mono"
+      className="bg-white border border-[#e5e7eb] rounded-[12px] p-4 flex flex-col h-[350px] font-sans shadow-none"
     >
       {/* Header */}
-      <div className="flex justify-between items-center border-b border-[#1f1f1f] pb-2 shrink-0">
-        <span className="text-[11px] font-bold text-[#666666] tracking-widest">
-          LIVE SERVE TELEMETRY
+      <div className="flex justify-between items-center border-b border-[#e5e7eb] pb-2 shrink-0">
+        <span className="text-[11px] font-medium text-[#6b7280] tracking-widest uppercase font-sans">
+          Live Serve Feed
         </span>
         {connectionIndicator()}
       </div>
@@ -63,13 +63,13 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
       {/* Events Streams Console */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto pr-1 py-2 space-y-[4px] text-[12px] leading-relaxed scrollbar-thin scrollbar-thumb-slate-800"
+        className="flex-1 overflow-y-auto pr-1 py-2 space-y-[4px] scrollbar-thin scrollbar-thumb-slate-200"
       >
         {events.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-[#444444] text-[11px]">
+          <div className="h-full flex flex-col items-center justify-center text-[#6b7280] text-[12px]">
             {connectionStatus === "connecting"
-              ? "CONNECTING TO SERVING WEBSOCKET..."
-              : "NO SYSTEM TRAFFIC DETECTED."}
+              ? "Connecting to serving websocket..."
+              : "No system serving traffic recorded."}
           </div>
         ) : (
           events.map((evt, idx) => {
@@ -87,23 +87,23 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
             return (
               <div
                 key={idx}
-                className="py-1.5 px-2 hover:bg-[#161616] border-b border-[#1f1f1f]/50 flex justify-between items-center text-[11px]"
+                className="py-1.5 px-2 hover:bg-[#f9fafb] border-b border-[#f3f4f6] flex justify-between items-center text-[13px]"
               >
                 <div className="flex items-center gap-2 truncate min-w-0">
-                  <span className="text-[#444444] shrink-0 font-semibold">{timeStr}</span>
-                  <span className="text-[#e8e8e8] font-semibold truncate">
+                  <span className="text-[#6b7280] shrink-0 font-sans text-xs">{timeStr}</span>
+                  <span className="text-[#111111] font-medium font-sans truncate text-[14px]">
                     {evt.feature_name}
                   </span>
-                  <span className="text-[#444444] shrink-0">
+                  <span className="text-[#6b7280] shrink-0 text-xs font-mono">
                     id:{evt.entity_id}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0 pl-2">
-                  <span className={`text-[10px] uppercase font-bold ${isCache ? "text-[#16a34a]" : "text-[#d97706]"}`}>
+                  <span className="bg-[#f1f5f9] text-[#475569] rounded-full px-2 py-0.5 text-[10px] font-medium font-sans uppercase tracking-wider">
                     {isCache ? "CACHE" : "DB"}
                   </span>
-                  <span className="text-[#a3e635] font-semibold">
+                  <span className="text-[#2563eb] font-mono text-[13px] font-semibold">
                     {evt.latency_ms.toFixed(1)}ms
                   </span>
                 </div>
@@ -113,9 +113,10 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
         )}
       </div>
 
+
       {hovered && events.length > 0 && (
-        <div className="text-[9px] text-[#444444] text-center pt-2 border-t border-[#1f1f1f] tracking-widest font-semibold">
-          CONSOLE STREAM PAUSED
+        <div className="text-[10px] text-[#6b7280] text-center pt-2 border-t border-[#e5e7eb] tracking-widest font-medium shrink-0">
+          STREAM PAUSED
         </div>
       )}
     </div>

@@ -2,14 +2,8 @@
 
 import React, { useState } from "react";
 import {
-  Sparkles,
   CheckCircle,
-  Code,
-  Tag,
-  BookOpen,
-  ArrowRight,
   RefreshCw,
-  Zap,
 } from "lucide-react";
 
 interface Suggestion {
@@ -33,10 +27,10 @@ export default function FeatureSuggestions({
   apiKey = "supersecretkeyreplaceinproduction",
 }: FeatureSuggestionsProps) {
   const [activeFilter, setActiveFilter] = useState<string>("all");
-  
+
   // Stored state: mapping feature_name to registered details (like DB ID)
   const [registeredList, setRegisteredList] = useState<Record<string, { id: string; name: string }>>({});
-  
+
   // Ingest state per suggestion
   const [registering, setRegistering] = useState<Record<string, boolean>>({});
   const [globalRegistering, setGlobalRegistering] = useState<boolean>(false);
@@ -51,7 +45,7 @@ export default function FeatureSuggestions({
 
   const handleRegister = async (item: Suggestion) => {
     if (registeredList[item.feature_name]) return;
-    
+
     setRegistering((prev) => ({ ...prev, [item.feature_name]: true }));
 
     try {
@@ -71,7 +65,6 @@ export default function FeatureSuggestions({
         ...prev,
         [item.feature_name]: { id: res.feature_id, name: res.name },
       }));
-
     } catch (err) {
       console.error("Suggestion registration error:", err);
       alert("Failed to register the recommended feature. Please check API parameters.");
@@ -85,7 +78,7 @@ export default function FeatureSuggestions({
     if (unregistered.length === 0) return;
 
     setGlobalRegistering(true);
-    
+
     try {
       await Promise.all(
         unregistered.map(async (item) => {
@@ -127,39 +120,39 @@ export default function FeatureSuggestions({
   });
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      
+    <div className="space-y-6 animate-in fade-in duration-500 font-sans">
       {/* Filters & Bulk Register Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#e5e7eb] pb-4">
         <div className="flex flex-wrap gap-1.5">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveFilter(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition ${
-                activeFilter === cat
-                  ? "bg-cyan-600/10 text-cyan-400 border border-cyan-500/20"
-                  : "bg-slate-900 border border-slate-800/80 text-slate-400 hover:border-slate-700 hover:text-slate-200"
-              }`}
-            >
-              {cat.replace("_", " ")}
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const isActive = activeFilter === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveFilter(cat)}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-150 ${
+                  isActive
+                    ? "bg-[#111111] text-white"
+                    : "bg-[#f5f5f5] text-[#475569] hover:bg-[#e5e7eb]"
+                }`}
+              >
+                {cat.replace("_", " ")}
+              </button>
+            );
+          })}
         </div>
-        
+
         <button
           onClick={handleRegisterAll}
           disabled={globalRegistering || suggestions.length === 0}
-          className="px-5 py-2.5 text-xs font-bold rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-1.5 shrink-0 transition"
+          className="btn-primary flex items-center justify-center gap-1.5 shrink-0 transition"
         >
           {globalRegistering ? (
             <>
               <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Registering features...
             </>
           ) : (
-            <>
-              <Zap className="h-3.5 w-3.5 text-amber-300" /> Register All Suggestions
-            </>
+            "Register all suggestions"
           )}
         </button>
       </div>
@@ -175,64 +168,62 @@ export default function FeatureSuggestions({
           return (
             <div
               key={item.feature_name}
-              className={`rounded-2xl glass-panel p-6 space-y-4 border transition-all duration-300 ${
-                isReg
-                  ? "border-emerald-500/30 bg-emerald-950/5 glow-green"
-                  : "hover:border-slate-700/60"
+              className={`rounded-[12px] bg-white border p-6 space-y-4 transition-all duration-300 ${
+                isReg ? "border-emerald-500 bg-emerald-500/5" : "border-[#e5e7eb] hover:border-[#9ca3af]"
               }`}
             >
-              
               {/* Header and Type badge */}
               <div className="flex justify-between items-start gap-4">
-                <div className="space-y-1 flex-1">
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 uppercase tracking-wider">
+                <div className="space-y-1 flex-1 min-w-0">
+                  <span className="tag-pill uppercase text-[10px] tracking-wider">
                     {item.feature_type}
                   </span>
-                  <h4 className="text-sm font-bold text-slate-200 font-mono mt-1 truncate">
+                  <h4 className="text-sm font-semibold text-[#111111] font-sans mt-1 truncate">
                     {isReg ? regInfo.name : item.feature_name}
                   </h4>
                 </div>
-                
+
                 {isReg ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">
-                    <CheckCircle className="h-3.5 w-3.5" /> Registered
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 font-sans">
+                    <CheckCircle className="h-3.5 w-3.5 text-emerald-600" /> Ingested
                   </span>
                 ) : (
                   <button
                     onClick={() => handleRegister(item)}
                     disabled={loading}
-                    className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white transition flex items-center gap-1 shrink-0"
+                    className="btn-secondary text-xs py-1.5 px-3 shrink-0"
                   >
                     {loading ? (
                       <RefreshCw className="h-3 w-3 animate-spin" />
                     ) : (
-                      <>
-                        Register <ArrowRight className="h-3 w-3" />
-                      </>
+                      "Register"
                     )}
                   </button>
                 )}
               </div>
 
-              <hr className="border-slate-800/80" />
+              <hr className="border-[#e5e7eb]" />
 
               {/* description and ML value details */}
-              <div className="space-y-3 text-xs leading-relaxed text-slate-350">
-                <p>{item.description}</p>
-                
-                <div className="p-3 bg-slate-900/40 border border-slate-800/60 rounded-xl space-y-1">
-                  <span className="font-semibold text-slate-400 flex items-center gap-1">
-                    <BookOpen className="h-3.5 w-3.5 text-cyan-400" /> ML Value explanation
+              <div className="space-y-3 text-xs leading-relaxed text-[#374151] font-sans">
+                <p className="text-sm">{item.description}</p>
+
+                <div className="p-3 bg-[#f8f9fa] border border-[#e5e7eb] rounded-[8px] space-y-1">
+                  <span className="font-semibold text-[#6b7280] block font-sans">
+                    ML value explanation:
                   </span>
-                  <p className="text-[11px] text-slate-400">{item.ml_value_explanation}</p>
+                  <p className="text-[11px] text-[#6b7280]">{item.ml_value_explanation}</p>
                 </div>
-                
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                    <Tag className="h-3.5 w-3.5" /> Inputs:
+
+                <div className="flex flex-wrap items-center gap-2 pt-1 font-sans">
+                  <span className="text-[10px] text-[#6b7280]">
+                    Required inputs:
                   </span>
                   {item.required_columns.map((c) => (
-                    <span key={c} className="px-1.5 py-0.5 rounded bg-slate-950 text-[10px] font-mono text-slate-400 border border-slate-800/80">
+                    <span
+                      key={c}
+                      className="px-1.5 py-0.5 rounded bg-[#f5f5f5] text-[10px] font-mono text-[#374151] border border-[#e5e7eb]"
+                    >
                       {c}
                     </span>
                   ))}
@@ -243,27 +234,25 @@ export default function FeatureSuggestions({
               <div className="space-y-2 pt-2">
                 <button
                   onClick={() => toggleCodeExpansion(item.feature_name)}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-slate-950/60 border border-slate-850 hover:border-slate-800 rounded-xl text-xs font-semibold text-slate-450 hover:text-slate-200 transition"
+                  className="w-full flex items-center justify-between px-3 py-2 bg-[#f8f9fa] border border-[#e5e7eb] hover:bg-[#e5e7eb]/35 rounded-[8px] text-xs font-semibold text-[#374151] transition"
                 >
-                  <span className="flex items-center gap-1.5">
-                    <Code className="h-4 w-4 text-cyan-400" /> Python Pandas Logic
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-normal">
-                    {expanded ? "Hide Code" : "Expand Code"}
+                  <span className="font-sans">Python Pandas logic</span>
+                  <span className="text-[10px] text-[#6b7280] font-normal">
+                    {expanded ? "Hide logic" : "Expand logic"}
                   </span>
                 </button>
 
                 {expanded && (
-                  <pre className="p-4 rounded-xl border border-slate-850 bg-slate-950/90 text-[10px] font-mono text-slate-300 overflow-x-auto leading-relaxed shadow-inner animate-in slide-in-from-top-2 duration-200">
+                  <pre className="p-4 rounded-[8px] border border-[#e5e7eb] bg-[#f8f9fa] text-[10px] font-mono text-[#111111] overflow-x-auto leading-relaxed shadow-none">
                     <code>{item.computation_code}</code>
                   </pre>
                 )}
               </div>
 
               {isReg && (
-                <div className="text-[10px] text-slate-500 flex justify-between pt-1 font-mono">
+                <div className="text-[10px] text-[#6b7280] flex justify-between pt-1 font-mono">
                   <span>DB UUID:</span>
-                  <span className="text-slate-400 select-all">{regInfo.id}</span>
+                  <span className="text-[#374151] select-all">{regInfo.id}</span>
                 </div>
               )}
             </div>

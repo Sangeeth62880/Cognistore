@@ -3,26 +3,26 @@
 @tailwind utilities;
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #e8e8e8;
-  --card: #111111;
-  --card-foreground: #e8e8e8;
-  --popover: #111111;
-  --popover-foreground: #e8e8e8;
-  --primary: #2563eb;
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #f5f5f5;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --primary: #111111;
   --primary-foreground: #ffffff;
-  --secondary: #161616;
-  --secondary-foreground: #e8e8e8;
-  --muted: #161616;
-  --muted-foreground: #666666;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #374151;
+  --muted: #f8f9fa;
+  --muted-foreground: #6b7280;
   --accent: #2563eb;
   --accent-foreground: #ffffff;
-  --destructive: #dc2626;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #1f1f1f;
-  --input: #111111;
-  --ring: #2563eb;
-  --radius: 4px;
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --ring: #111111;
+  --radius: 8px;
 }
 
 body {
@@ -32,67 +32,148 @@ body {
   overflow-x: hidden;
 }
 
-/* Developers Layout Styling Helpers */
+/* Glassmorphism overrides to flat hairline styles */
 .glass-panel {
-  background: #111111;
-  border: 1px solid #1f1f1f;
-  border-radius: 4px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
 }
 
 .glass-card {
-  background: #111111;
-  border: 1px solid #1f1f1f;
-  border-radius: 4px;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  background: #f5f5f5;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  transition: background-color 0.15s ease;
 }
 
 .glass-card:hover {
-  border-color: #3b82f6;
-  background-color: #161616;
+  background-color: #f0f0f0;
 }
 
-/* Redefined Status helpers (flat and low-key highlight colors) */
+/* Status colors and outlines */
 .glow-indigo, .glow-green, .glow-red {
   box-shadow: none !important;
 }
 
-/* Dev Table custom styles */
+/* Cal.com tabular view */
 .dev-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .dev-table th {
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  color: #666666;
-  padding: 10px 14px;
-  border-bottom: 1px solid #1f1f1f;
-  background-color: #0f0f0f;
+  font-weight: 500;
+  font-size: 12px;
+  color: #6b7280;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  background-color: #f8f9fa;
+  text-align: left;
 }
 
 .dev-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid #1f1f1f;
-  color: #e8e8e8;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
 }
 
-.dev-table tr:nth-child(even) {
-  background-color: #0f0f0f;
-}
-
-.dev-table tr:nth-child(odd) {
-  background-color: #111111;
+.dev-table tr {
+  background-color: #ffffff;
+  transition: background-color 0.15s ease;
 }
 
 .dev-table tr:hover {
-  background-color: #161616;
+  background-color: #f9fafb;
 }
 
-/* JetBrains Mono overrides for tech values */
+/* UI Overhaul Utility Classes */
+.search-input {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #111111;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.search-input::placeholder {
+  color: #9ca3af;
+}
+.search-input:focus {
+  border-color: #111111;
+}
+
+.stat-card {
+  background-color: #f5f5f5;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+}
+.stat-card-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.stat-card-value {
+  font-family: 'Inter', sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #111111;
+  line-height: 1.25;
+}
+
+.tag-pill {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 9999px;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-primary {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #111111;
+  border-radius: 8px;
+  padding: 10px 16px;
+  transition: background-color 0.15s ease;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background-color: #222222;
+}
+
+.btn-secondary {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111111;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 16px;
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+/* JetBrains Mono overrides strictly for tech values */
 .font-mono {
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
 }
+

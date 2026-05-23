@@ -21,41 +21,32 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
     {
       title: "TOTAL FEATURES",
       value: metrics.total_features,
-      unit: "REG",
-      description: "Active registry definitions.",
+      description: "Active registry definitions",
     },
     {
       title: "TOTAL MODELS",
       value: metrics.total_models,
-      unit: "REG",
-      description: "Bound serving pipelines.",
+      description: "Bound serving pipelines",
     },
     {
       title: "SERVING LATENCY",
-      value: metrics.avg_serving_latency_ms.toFixed(2),
-      unit: "MS AVG",
-      description: "Calculated over last 1,000 queries.",
-      highlight: metrics.avg_serving_latency_ms > 10.0 ? "text-[#d97706]" : "text-[#a3e635]",
+      value: `${metrics.avg_serving_latency_ms.toFixed(2)} ms`,
+      description: "Calculated over last 1,000 queries",
     },
     {
       title: "CACHE HIT RATE",
-      value: metrics.cache_hit_rate.toFixed(1),
-      unit: "%",
-      description: "Upstash caching execution ratio.",
-      highlight: metrics.cache_hit_rate >= 80.0 ? "text-[#a3e635]" : "text-[#dc2626]",
+      value: `${metrics.cache_hit_rate.toFixed(1)}%`,
+      description: "Upstash caching execution ratio",
     },
     {
       title: "ACTIVE ALERTS",
       value: metrics.active_alerts_count,
-      unit: "DRIFT",
-      description: "Active statistical shifts alarm count.",
-      highlight: metrics.active_alerts_count > 0 ? "text-[#dc2626]" : "text-[#16a34a]",
+      description: "Active statistical shifts count",
     },
     {
       title: "COMPUTED (24H)",
       value: metrics.features_computed_last_24h,
-      unit: "VALS",
-      description: "Aggregations parsed last 24 hours.",
+      description: "Aggregations parsed last 24h",
     },
   ];
 
@@ -64,22 +55,19 @@ export default function MetricsCards({ metrics }: MetricsCardsProps) {
       {cards.map((card, index) => (
         <div
           key={index}
-          className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 flex flex-col justify-between h-[120px]"
+          className="bg-[#f5f5f5] border border-[#e5e7eb] rounded-[12px] p-5 flex flex-col justify-between h-[120px] shadow-none"
         >
           <div className="space-y-1">
-            <span className="text-[11px] font-semibold text-[#666666] tracking-widest block">
+            <span className="text-[11px] font-medium text-[#6b7280] tracking-widest block font-sans">
               {card.title}
             </span>
-            <div className="flex items-baseline gap-1.5 pt-1">
-              <span className={`text-3xl font-bold font-mono tracking-tight ${card.highlight || "text-[#e8e8e8]"}`}>
+            <div className="pt-1">
+              <span className="text-3xl font-semibold text-[#111111] tracking-tight font-sans">
                 {card.value}
-              </span>
-              <span className="text-[10px] font-mono text-[#444444] font-semibold">
-                {card.unit}
               </span>
             </div>
           </div>
-          <div className="text-[10px] text-[#444444] border-t border-[#1f1f1f]/50 pt-2 font-mono">
+          <div className="text-[13px] text-[#9ca3af] font-sans">
             {card.description}
           </div>
         </div>

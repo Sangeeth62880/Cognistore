@@ -124,48 +124,52 @@ export default function Dashboard() {
         </div>
 
         {/* Right Column: Latency Chart (60% / Col-span 6) */}
-        <div className="lg:col-span-6 bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col h-[350px]">
-          <div className="flex justify-between items-center border-b border-[#1f1f1f] pb-2 shrink-0">
-            <span className="text-[11px] font-bold text-[#666666] tracking-widest uppercase">
-              LATENCY TIMELINE
+        <div className="lg:col-span-6 bg-white border border-[#e5e7eb] rounded-[12px] p-4 flex flex-col h-[350px]">
+          <div className="flex justify-between items-center border-b border-[#e5e7eb] pb-2 shrink-0">
+            <span className="text-[11px] font-medium text-[#6b7280] tracking-widest uppercase font-sans">
+              Latency Timeline
             </span>
-            <span className="text-[9px] font-mono text-[#444444] uppercase tracking-wider">
-              {chartData.length} SERVING SAMPLES
+            <span className="text-[10px] font-mono text-[#9ca3af] uppercase tracking-wider">
+              {chartData.length} serving samples
             </span>
           </div>
 
           <div className="flex-1 w-full min-h-0 pt-3">
             {chartData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-center text-[#444444] text-[11px] font-mono">
-                NO LATENCY TRAFFIC RECORDED IN BUFFER.
+              <div className="h-full flex items-center justify-center text-center text-[#9ca3af] text-[11px] font-mono">
+                NO SERVING TRAFFIC RECORDED
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="0" stroke="#1f1f1f" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
                     dataKey="query"
-                    stroke="#444444"
+                    stroke="#9ca3af"
                     fontSize={10}
                     tickLine={false}
                     axisLine={false}
+                    className="font-mono"
                   />
                   <YAxis
-                    stroke="#444444"
+                    stroke="#9ca3af"
                     fontSize={10}
                     tickLine={false}
                     axisLine={false}
+                    className="font-mono"
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#111111",
-                      borderColor: "#1f1f1f",
-                      borderRadius: "4px",
-                      fontSize: "11px",
-                      fontFamily: "monospace",
+                      backgroundColor: "#ffffff",
+                      borderColor: "#e5e7eb",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      fontFamily: "sans-serif",
+                      boxShadow: "none",
                     }}
-                    itemStyle={{ color: "#e8e8e8" }}
-                    labelFormatter={(label) => `SAMPLE: ${label}`}
+                    itemStyle={{ color: "#111111" }}
+                    labelStyle={{ color: "#6b7280", fontWeight: 500 }}
+                    labelFormatter={(label) => `Sample: ${label}`}
                   />
                   <Line
                     type="monotone"
@@ -173,7 +177,7 @@ export default function Dashboard() {
                     stroke="#2563eb"
                     strokeWidth={1.5}
                     dot={false}
-                    activeDot={{ r: 4, fill: "#2563eb", stroke: "#111111", strokeWidth: 2 }}
+                    activeDot={{ r: 4, fill: "#2563eb", stroke: "#ffffff", strokeWidth: 2 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -183,16 +187,16 @@ export default function Dashboard() {
       </div>
 
       {/* 3. Quick Actions Plain Text List Row */}
-      <div className="pt-4 border-t border-[#1f1f1f] flex flex-col sm:flex-row sm:items-center gap-4">
-        <span className="text-[11px] font-bold text-[#666666] tracking-widest uppercase">
-          QUICK ACTIONS:
+      <div className="pt-4 border-t border-[#e5e7eb] flex flex-col sm:flex-row sm:items-center gap-4">
+        <span className="text-[11px] font-medium text-[#6b7280] tracking-widest uppercase font-sans">
+          Quick Actions:
         </span>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           {quickActions.map((action, idx) => (
             <Link
               key={idx}
               href={action.href}
-              className="text-[13px] font-medium text-[#2563eb] hover:text-[#e8e8e8] transition-colors duration-150"
+              className="text-[13px] font-medium text-[#2563eb] hover:text-[#111111] transition-colors duration-150"
             >
               {action.label} &rarr;
             </Link>
@@ -202,3 +206,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

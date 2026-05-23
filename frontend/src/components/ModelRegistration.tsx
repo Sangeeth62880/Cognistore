@@ -2,16 +2,9 @@
 
 import React, { useState } from "react";
 import {
-  Brain,
-  ChevronRight,
   RefreshCw,
   CheckCircle,
   AlertCircle,
-  ArrowLeft,
-  Cpu,
-  Layers,
-  Activity,
-  Plus,
 } from "lucide-react";
 import FeatureRecommendations from "./FeatureRecommendations";
 
@@ -34,7 +27,7 @@ export default function ModelRegistration({
 }: ModelRegistrationProps) {
   // Stepper state: 1 = Form Input, 2 = Recommendations, 3 = Success
   const [step, setStep] = useState<number>(1);
-  
+
   // Form values
   const [modelName, setModelName] = useState<string>("");
   const [version, setVersion] = useState<string>("v1.0");
@@ -44,12 +37,12 @@ export default function ModelRegistration({
   // Recommendations and selections
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [selectedFeatureIds, setSelectedFeatureIds] = useState<string[]>([]);
-  
+
   // Loading & Ingestion States
   const [loading, setLoading] = useState<boolean>(false);
   const [registering, setRegistering] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Final payload
   const [registeredModel, setRegisteredModel] = useState<any>(null);
 
@@ -87,7 +80,7 @@ export default function ModelRegistration({
       }
 
       const data = await response.json();
-      
+
       if (data.status === "insufficient_features") {
         setError(data.message);
         setStep(1);
@@ -118,7 +111,7 @@ export default function ModelRegistration({
     setError(null);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      
+
       const response = await fetch(`${apiUrl}/models/register-with-recommendations`, {
         method: "POST",
         headers: getHeaders(),
@@ -161,100 +154,103 @@ export default function ModelRegistration({
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto animate-in fade-in duration-300">
-      
+    <div className="space-y-8 max-w-4xl mx-auto animate-in fade-in duration-300 font-sans">
       {/* Visual Stepper Indicators */}
       <div className="flex items-center justify-center max-w-lg mx-auto gap-4">
         {[
           { label: "Define Model", num: 1 },
           { label: "Select Features", num: 2 },
           { label: "Completion", num: 3 },
-        ].map((s, idx) => (
-          <React.Fragment key={s.num}>
-            <div className="flex items-center gap-2">
-              <span
-                className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold font-mono border transition ${
-                  step === s.num
-                    ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30 glow-cyan font-bold"
-                    : step > s.num
-                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                    : "bg-slate-900 text-slate-500 border-slate-800"
-                }`}
-              >
-                {step > s.num ? "✓" : s.num}
-              </span>
-              <span
-                className={`text-[10px] font-bold uppercase tracking-wider ${
-                  step === s.num ? "text-slate-200" : "text-slate-500"
-                }`}
-              >
-                {s.label}
-              </span>
-            </div>
-            {idx < 2 && (
-              <ChevronRight
-                className={`h-4 w-4 ${step > s.num ? "text-emerald-500" : "text-slate-800"}`}
-              />
-            )}
-          </React.Fragment>
-        ))}
+        ].map((s, idx) => {
+          const isActive = step === s.num;
+          const isCompleted = step > s.num;
+
+          return (
+            <React.Fragment key={s.num}>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold font-sans border transition ${
+                    isActive
+                      ? "bg-[#111111] text-white border-[#111111]"
+                      : isCompleted
+                      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                      : "bg-white text-[#9ca3af] border-[#e5e7eb]"
+                  }`}
+                >
+                  {isCompleted ? "✓" : s.num}
+                </span>
+                <span
+                  className={`text-[11px] font-semibold font-sans uppercase tracking-wider ${
+                    isActive ? "text-[#111111]" : "text-[#6b7280]"
+                  }`}
+                >
+                  {s.label}
+                </span>
+              </div>
+              {idx < 2 && (
+                <span className={`text-[12px] ${step > s.num ? "text-emerald-500" : "text-[#e5e7eb]"}`}>
+                  &rarr;
+                </span>
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
 
       {/* Error Alert panel */}
       {error && (
-        <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-5 flex items-start gap-3.5 glow-red">
-          <AlertCircle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-rose-300">Form Error</h3>
-            <p className="text-xs text-rose-400/90 leading-relaxed">{error}</p>
+        <div className="rounded-[8px] border border-[#ef4444] bg-[#ef4444]/5 p-5 flex items-start gap-3.5 text-xs text-[#ef4444]">
+          <AlertCircle className="h-5 w-5 text-[#ef4444] shrink-0" />
+          <div className="space-y-1 font-sans">
+            <h3 className="font-semibold">Model registration failed</h3>
+            <p className="leading-relaxed opacity-95">{error}</p>
           </div>
         </div>
       )}
 
       {/* --- Step 1: Form Inputs --- */}
       {step === 1 && (
-        <form onSubmit={handleGetRecommendations} className="rounded-2xl glass-panel p-6 space-y-6">
+        <form onSubmit={handleGetRecommendations} className="bg-white border border-[#e5e7eb] rounded-[12px] p-6 space-y-6">
           <div className="space-y-4">
-            <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-850 pb-2">
-              <Brain className="h-4 w-4 text-cyan-400" /> Define Target Model Specifications
+            <h3 className="text-sm font-semibold text-[#111111] border-b border-[#e5e7eb] pb-2 font-sans">
+              Define target model specifications
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              
               {/* Model Name */}
               <div className="sm:col-span-2 space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Model Name</label>
+                <label className="text-[13px] font-medium text-[#374151] block font-sans">Model name</label>
                 <input
                   type="text"
                   placeholder="e.g. churn_prediction"
                   required
                   value={modelName}
                   onChange={(e) => setModelName(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs bg-slate-900/60 border border-slate-800 focus:border-cyan-500 rounded-xl outline-none text-slate-200 transition-all font-mono"
+                  className="w-full px-3 py-2 text-sm bg-white border border-[#e5e7eb] rounded-[8px] outline-none text-[#111111] focus:ring-1 focus:ring-[#111111] placeholder:text-[#9ca3af] transition-all duration-150 font-sans"
                 />
               </div>
 
               {/* Version */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Deploy Version</label>
+                <label className="text-[13px] font-medium text-[#374151] block font-sans">Deploy version</label>
                 <input
                   type="text"
                   placeholder="e.g. v1.0"
                   required
                   value={version}
                   onChange={(e) => setVersion(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs bg-slate-900/60 border border-slate-800 focus:border-cyan-500 rounded-xl outline-none text-slate-200 transition-all font-mono"
+                  className="w-full px-3 py-2 text-sm bg-white border border-[#e5e7eb] rounded-[8px] outline-none text-[#111111] focus:ring-1 focus:ring-[#111111] placeholder:text-[#9ca3af] transition-all duration-150 font-mono"
                 />
               </div>
             </div>
 
             {/* Model Task */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Model Task Type</label>
+              <label className="text-[13px] font-medium text-[#374151] block font-sans">Model task type</label>
               <select
                 value={modelTask}
                 onChange={(e) => setModelTask(e.target.value)}
-                className="w-full px-4 py-2.5 text-xs bg-slate-900/60 border border-slate-800 focus:border-cyan-500 rounded-xl outline-none text-slate-200 transition-all"
+                className="w-full px-3 py-2 text-sm bg-white border border-[#e5e7eb] rounded-[8px] outline-none text-[#111111] focus:ring-1 focus:ring-[#111111] transition-all duration-150 font-sans"
               >
                 <option value="classification">Classification (Predict Categories, Churn, Fraud)</option>
                 <option value="regression">Regression (Predict Numeric Amounts, Lifetime Value, Price)</option>
@@ -265,14 +261,14 @@ export default function ModelRegistration({
 
             {/* Model Description */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Model Goal & Description</label>
+              <label className="text-[13px] font-medium text-[#374151] block font-sans">Model goal & description</label>
               <textarea
-                placeholder="Describe the target objectives, input signals, and business constraints of this model in detail so the AI can rank features correctly..."
+                placeholder="Describe the target objectives, input signals, and business constraints of this model in detail..."
                 rows={4}
                 required
                 value={modelDescription}
                 onChange={(e) => setModelDescription(e.target.value)}
-                className="w-full px-4 py-2.5 text-xs bg-slate-900/60 border border-slate-800 focus:border-cyan-500 rounded-xl outline-none text-slate-200 transition-all placeholder:text-slate-600 leading-relaxed"
+                className="w-full px-3 py-2 text-sm bg-white border border-[#e5e7eb] rounded-[8px] outline-none text-[#111111] focus:ring-1 focus:ring-[#111111] placeholder:text-[#9ca3af] transition-all duration-150 leading-relaxed resize-none"
               />
             </div>
           </div>
@@ -281,16 +277,14 @@ export default function ModelRegistration({
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2.5 text-xs font-semibold rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-bold shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-1.5 transition-all"
+              className="btn-primary flex items-center justify-center gap-1.5"
             >
               {loading ? (
                 <>
-                  <RefreshCw className="h-4 w-4 animate-spin" /> Suggesting Features...
+                  <RefreshCw className="h-4 w-4 animate-spin" /> Suggesting features...
                 </>
               ) : (
-                <>
-                  Get Recommendations <ChevronRight className="h-4 w-4" />
-                </>
+                "Get recommendations"
               )}
             </button>
           </div>
@@ -300,15 +294,15 @@ export default function ModelRegistration({
       {/* --- Step 2: Recommendations List --- */}
       {step === 2 && (
         <div className="space-y-6">
-          <div className="rounded-2xl glass-panel p-6 space-y-4">
-            <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2 border-b border-slate-850 pb-2">
-              <Cpu className="h-4 w-4 text-cyan-400" /> Bound Semantic Recommendations
+          <div className="bg-white border border-[#e5e7eb] rounded-[12px] p-6 space-y-4 shadow-none">
+            <h3 className="text-sm font-semibold text-[#111111] border-b border-[#e5e7eb] pb-2 font-sans">
+              Bound semantic recommendations
             </h3>
-            
-            <p className="text-xs text-slate-400 leading-relaxed">
-              We evaluated <span className="font-bold text-slate-350">{recommendations.length}</span> active features in your store. The LLM has ranked and explained which signals carry high predictive relevance for <span className="font-bold text-cyan-400">{modelName}</span>. Check the ones you want to link.
+
+            <p className="text-xs text-[#6b7280] leading-relaxed font-sans">
+              We evaluated <span className="font-bold text-[#111111]">{recommendations.length}</span> active features in your store. The LLM has ranked and explained which signals carry high predictive relevance for <span className="font-bold text-[#2563eb]">{modelName}</span>. Check the ones you want to link.
             </p>
-            
+
             <FeatureRecommendations
               recommendations={recommendations}
               selectedFeatureIds={selectedFeatureIds}
@@ -316,30 +310,28 @@ export default function ModelRegistration({
             />
           </div>
 
-          {/* Stepper actions */}
+          {/* Actions */}
           <div className="flex justify-between items-center">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-900 border border-slate-800 text-slate-450 hover:text-slate-200 transition flex items-center gap-1.5"
+              className="btn-secondary text-xs flex items-center gap-1.5"
             >
-              <ArrowLeft className="h-4 w-4" /> Back to Specs
+              Back to specifications
             </button>
-            
+
             <button
               type="button"
               onClick={handleRegisterModel}
               disabled={registering || selectedFeatureIds.length === 0}
-              className="px-5 py-2.5 text-xs font-semibold rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-1.5 transition"
+              className="btn-primary text-xs flex items-center justify-center gap-1.5"
             >
               {registering ? (
                 <>
-                  <RefreshCw className="h-4 w-4 animate-spin" /> Registering Model...
+                  <RefreshCw className="h-4 w-4 animate-spin" /> Registering model...
                 </>
               ) : (
-                <>
-                  <Layers className="h-4 w-4 text-emerald-300" /> Register Model configuration
-                </>
+                "Register model configuration"
               )}
             </button>
           </div>
@@ -348,47 +340,46 @@ export default function ModelRegistration({
 
       {/* --- Step 3: Success Completion --- */}
       {step === 3 && registeredModel && (
-        <div className="rounded-2xl glass-panel p-8 space-y-6 text-center animate-in zoom-in duration-300">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto shadow shadow-emerald-500/10">
+        <div className="bg-white border border-[#e5e7eb] rounded-[12px] p-8 space-y-6 text-center shadow-none animate-in zoom-in duration-300">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 mx-auto">
             <CheckCircle className="h-7 w-7" />
           </div>
-          
+
           <div className="space-y-2">
-            <h3 className="text-lg font-bold text-slate-100">Model Deployment Logged</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <h3 className="text-lg font-bold text-[#111111] font-sans">Model Deployment Logged</h3>
+            <p className="text-xs text-[#6b7280] max-w-sm mx-auto font-sans">
               ML Model schema definitions and bound features list have been locked in repository metadata registry.
             </p>
           </div>
 
           {/* Locked stats summaries */}
-          <div className="max-w-md mx-auto grid grid-cols-2 gap-4 bg-slate-950/40 p-4 rounded-2xl border border-slate-850/80 text-left text-xs text-slate-450 leading-relaxed font-mono">
+          <div className="max-w-md mx-auto grid grid-cols-2 gap-4 bg-[#f5f5f5] p-4 rounded-[8px] border border-[#e5e7eb] text-left text-xs text-[#374151] leading-relaxed font-mono">
             <div>
-              <span className="block text-[10px] text-slate-500 uppercase tracking-wide">Registry Name</span>
-              <span className="text-slate-200 font-bold truncate block">{registeredModel.name}</span>
+              <span className="block text-[10px] text-[#6b7280] uppercase tracking-wide font-sans">Registry Name</span>
+              <span className="text-[#111111] font-bold truncate block font-sans">{registeredModel.name}</span>
             </div>
             <div>
-              <span className="block text-[10px] text-slate-500 uppercase tracking-wide">Version</span>
-              <span className="text-slate-200 font-bold block">{registeredModel.version}</span>
+              <span className="block text-[10px] text-[#6b7280] uppercase tracking-wide font-sans">Version</span>
+              <span className="text-[#111111] font-bold block">{registeredModel.version}</span>
             </div>
-            <div className="col-span-2 pt-2 border-t border-slate-900">
-              <span className="block text-[10px] text-slate-500 uppercase tracking-wide">Model ID UUID</span>
-              <span className="text-cyan-400 font-bold break-all block">{registeredModel.id}</span>
+            <div className="col-span-2 pt-2 border-t border-[#e5e7eb]">
+              <span className="block text-[10px] text-[#6b7280] uppercase tracking-wide font-sans">Model UUID</span>
+              <span className="text-[#2563eb] font-bold break-all block">{registeredModel.id}</span>
             </div>
-            <div className="col-span-2 pt-2 border-t border-slate-900 flex justify-between">
+            <div className="col-span-2 pt-2 border-t border-[#e5e7eb] flex justify-between items-center">
               <div>
-                <span className="block text-[10px] text-slate-500 uppercase tracking-wide">Bound Features Count</span>
-                <span className="text-emerald-400 font-bold block">{registeredModel.features.length} features linked</span>
+                <span className="block text-[10px] text-[#6b7280] uppercase tracking-wide font-sans">Bound Features Count</span>
+                <span className="text-emerald-600 font-bold block font-sans">{registeredModel.features.length} features linked</span>
               </div>
-              <Activity className="h-5 w-5 text-emerald-500 shrink-0 self-center opacity-40" />
             </div>
           </div>
 
           <div className="flex justify-center gap-4 pt-2">
             <button
               onClick={handleReset}
-              className="px-5 py-2.5 text-xs font-semibold rounded-xl bg-slate-900 border border-slate-800 text-slate-350 hover:text-slate-100 flex items-center justify-center gap-1.5 transition"
+              className="btn-primary text-xs"
             >
-              <Plus className="h-4 w-4 text-cyan-400" /> Log another model
+              Log another model
             </button>
           </div>
         </div>
