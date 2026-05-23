@@ -29,31 +29,31 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-animate min-h-screen text-slate-100 font-sans`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0a0a0a] min-h-screen text-[#e8e8e8] font-sans`}
       >
         <div className="flex min-h-screen">
           {/* Sidebar */}
           <Sidebar />
 
           {/* Main Layout Area */}
-          <div className="flex-1 pl-72 flex flex-col">
+          <div className="flex-1 pl-[220px] flex flex-col">
             {/* Topbar/Header */}
-            <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-800/80 px-8 glass-panel backdrop-blur-md">
+            <header className="sticky top-0 z-10 flex h-12 items-center justify-between border-b border-[#1f1f1f] px-6 bg-[#0a0a0a]">
               <div className="flex items-center gap-4">
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300">
+                <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider">
                   Cluster ID: default-us-east
                 </span>
               </div>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs text-slate-400 font-medium">System operational</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#16a34a]" />
+                  <span className="text-[11px] text-[#666666] font-mono uppercase tracking-wider">Operational</span>
                 </div>
               </div>
             </header>
 
             {/* Content Container */}
-            <main className="flex-1 p-8">
+            <main className="flex-1 p-6">
               {children}
             </main>
           </div>

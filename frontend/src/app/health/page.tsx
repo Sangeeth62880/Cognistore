@@ -1,17 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  HeartPulse,
-  Database,
-  Layers,
-  RefreshCw,
-  Server,
-  Activity,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-} from "lucide-react";
 
 interface HealthData {
   status: string;
@@ -45,7 +34,7 @@ export default function HealthPage() {
     } catch (err: any) {
       console.error("Health check fetch failed:", err);
       setError(
-        err.message || "Failed to reach backend services. Please ensure your backend container is running."
+        err.message || "Failed to reach backend services. Please ensure your backend is running."
       );
       setHealth(null);
     } finally {
@@ -57,192 +46,144 @@ export default function HealthPage() {
     fetchHealth();
   }, [fetchHealth]);
 
-  const isHealthy = health?.status === "healthy";
   const dbOk = health?.db_connected ?? false;
   const redisOk = health?.redis_connected ?? false;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
-      {/* Header with Title and Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <HeartPulse className="h-6 w-6 text-violet-400" /> System Diagnostics
-          </h1>
-          <p className="text-sm text-slate-400">
-            Real-time status monitor for active databases, caches, and API nodes.
+    <div className="space-y-6 max-w-full mx-auto font-sans">
+      
+      {/* Top Header Section */}
+      <div className="flex flex-row items-center justify-between border-b border-[#1f1f1f] pb-4">
+        <div className="space-y-1">
+          <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider block">
+            SYSTEM DIAGNOSTICS & INFRASTRUCTURE HEALTH
+          </span>
+          <p className="text-[13px] text-[#666666] leading-normal max-w-xl">
+            Real-time status monitors for backend services, registry databases, and Upstash Redis clusters.
           </p>
         </div>
         <button
           onClick={fetchHealth}
           disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 border border-slate-700 transition-colors"
+          className="px-3 py-1.5 text-xs font-mono border border-[#1f1f1f] bg-transparent text-[#e8e8e8] rounded-[4px] hover:bg-[#111111] hover:border-[#666666] transition-colors duration-150"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          {loading ? "Checking..." : "Refresh Diagnostics"}
+          {loading ? "CHECKING..." : "RUN DIAGNOSTIC"}
         </button>
       </div>
 
-      {/* Connection Failure Warning Banner */}
       {error && (
-        <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-5 flex items-start gap-3.5 glow-red">
-          <AlertTriangle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-rose-300">Backend Connection Error</h3>
-            <p className="text-xs text-rose-400/90 leading-relaxed">{error}</p>
-          </div>
+        <div className="rounded-[4px] border border-[#dc2626] bg-[#dc2626]/5 p-4 text-[12px] font-mono text-[#dc2626]">
+          [ERROR] Connection failure: {error}
         </div>
       )}
 
-      {/* Main Status Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* API Server Card */}
-        <div className="rounded-2xl glass-panel p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
-                <Server className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-slate-200">API Backend</h3>
+      {/* Main Status Row (3 status items in horizontal row) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        {/* Service 1: API BACKEND */}
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#1f1f1f] pb-2">
+            <span className="text-[11px] font-mono font-bold text-[#666666] uppercase tracking-wider">
+              API BACKEND GATEWAY
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${health ? "bg-[#16a34a]" : "bg-[#dc2626]"}`} />
+              <span className="text-[9px] font-mono text-[#666666] font-bold uppercase">
+                {health ? "ONLINE" : "OFFLINE"}
+              </span>
             </div>
-            {loading ? (
-              <span className="h-2 w-2 rounded-full bg-slate-500 animate-pulse" />
-            ) : health ? (
-              <CheckCircle2 className="h-5 w-5 text-green-400" />
-            ) : (
-              <XCircle className="h-5 w-5 text-red-400" />
-            )}
           </div>
-          <div className="space-y-1.5 text-xs text-slate-400">
+          
+          <div className="space-y-1.5 text-[11px] font-mono text-[#666666]">
             <div className="flex justify-between">
-              <span>Endpoint:</span>
-              <span className="font-mono text-slate-300">/health</span>
+              <span>ENDPOINT:</span>
+              <span className="text-[#e8e8e8]">/health</span>
             </div>
             <div className="flex justify-between">
-              <span>Environment:</span>
-              <span className="capitalize text-slate-300">{health?.environment || "unknown"}</span>
+              <span>ENV:</span>
+              <span className="text-[#e8e8e8] uppercase">{health?.environment || "unknown"}</span>
             </div>
             <div className="flex justify-between">
-              <span>Status:</span>
-              <span
-                className={`font-semibold ${
-                  health ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {health ? "Online" : "Offline"}
+              <span>HEALTH:</span>
+              <span className={health ? "text-[#16a34a] font-bold" : "text-[#dc2626] font-bold"}>
+                {health ? "OPERATIONAL" : "UNREACHABLE"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* PostgreSQL Database Card */}
-        <div className="rounded-2xl glass-panel p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
-                <Database className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-slate-200">PostgreSQL</h3>
+        {/* Service 2: POSTGRESQL DB */}
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#1f1f1f] pb-2">
+            <span className="text-[11px] font-mono font-bold text-[#666666] uppercase tracking-wider">
+              POSTGRESQL REGISTRY
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${dbOk ? "bg-[#16a34a]" : "bg-[#dc2626]"}`} />
+              <span className="text-[9px] font-mono text-[#666666] font-bold uppercase">
+                {dbOk ? "CONNECTED" : "DISCONNECTED"}
+              </span>
             </div>
-            {loading ? (
-              <span className="h-2 w-2 rounded-full bg-slate-500 animate-pulse" />
-            ) : dbOk ? (
-              <CheckCircle2 className="h-5 w-5 text-green-400" />
-            ) : (
-              <XCircle className="h-5 w-5 text-red-400" />
-            )}
           </div>
-          <div className="space-y-1.5 text-xs text-slate-400">
+          
+          <div className="space-y-1.5 text-[11px] font-mono text-[#666666]">
             <div className="flex justify-between">
-              <span>Driver:</span>
-              <span className="font-mono text-slate-300">asyncpg (SQLAlchemy)</span>
+              <span>DRIVER:</span>
+              <span className="text-[#e8e8e8]">asyncpg (SQLAlchemy)</span>
             </div>
             <div className="flex justify-between">
-              <span>Host:</span>
-              <span className="font-mono text-slate-300">db (container)</span>
+              <span>HOST:</span>
+              <span className="text-[#e8e8e8]">db.supabase.co</span>
             </div>
             <div className="flex justify-between">
-              <span>Connection:</span>
-              <span
-                className={`font-semibold ${
-                  dbOk ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {dbOk ? "Established" : "Failed"}
+              <span>CONNECTION:</span>
+              <span className={dbOk ? "text-[#16a34a] font-bold" : "text-[#dc2626] font-bold"}>
+                {dbOk ? "ESTABLISHED" : "FAILURE"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Redis Cache Card */}
-        <div className="rounded-2xl glass-panel p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
-                <Layers className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-slate-200">Redis Cache</h3>
+        {/* Service 3: REDIS CACHE */}
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#1f1f1f] pb-2">
+            <span className="text-[11px] font-mono font-bold text-[#666666] uppercase tracking-wider">
+              REDIS SERVING CACHE
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${redisOk ? "bg-[#16a34a]" : "bg-[#dc2626]"}`} />
+              <span className="text-[9px] font-mono text-[#666666] font-bold uppercase">
+                {redisOk ? "CONNECTED" : "DISCONNECTED"}
+              </span>
             </div>
-            {loading ? (
-              <span className="h-2 w-2 rounded-full bg-slate-500 animate-pulse" />
-            ) : redisOk ? (
-              <CheckCircle2 className="h-5 w-5 text-green-400" />
-            ) : (
-              <XCircle className="h-5 w-5 text-red-400" />
-            )}
           </div>
-          <div className="space-y-1.5 text-xs text-slate-400">
+          
+          <div className="space-y-1.5 text-[11px] font-mono text-[#666666]">
             <div className="flex justify-between">
-              <span>Library:</span>
-              <span className="font-mono text-slate-300">redis.asyncio</span>
+              <span>LIBRARY:</span>
+              <span className="text-[#e8e8e8]">redis.asyncio</span>
             </div>
             <div className="flex justify-between">
-              <span>Host:</span>
-              <span className="font-mono text-slate-300">redis (container)</span>
+              <span>HOST:</span>
+              <span className="text-[#e8e8e8]">upstash.io (caching)</span>
             </div>
             <div className="flex justify-between">
-              <span>Connection:</span>
-              <span
-                className={`font-semibold ${
-                  redisOk ? "text-green-400" : "text-red-400"
-                }`}
-              >
-                {redisOk ? "Established" : "Failed"}
+              <span>CONNECTION:</span>
+              <span className={redisOk ? "text-[#16a34a] font-bold" : "text-[#dc2626] font-bold"}>
+                {redisOk ? "ESTABLISHED" : "FAILURE"}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Visual Diagnostic Pulse */}
+      {/* Diagnostics Verification Footer Info */}
       {!loading && health && (
-        <div className={`rounded-2xl glass-panel p-6 border ${
-          isHealthy ? "border-green-500/20 glow-green" : "border-rose-500/20 glow-red"
-        }`}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 border ${
-                isHealthy ? "border-green-500/30 text-green-400" : "border-rose-500/30 text-rose-400"
-              }`}>
-                <Activity className={`h-6 w-6 ${isHealthy ? "animate-pulse" : ""}`} />
-              </div>
-              <div>
-                <h3 className="text-md font-bold text-slate-100">
-                  Overall Server Cluster Status: <span className="capitalize">{health.status}</span>
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Last monitored verification: {lastRefreshed || "Just now"}
-                </p>
-              </div>
-            </div>
-            <div className="shrink-0 flex items-center gap-2">
-              <span className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${
-                isHealthy ? "bg-green-500/10 text-green-400 border border-green-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-              }`}>
-                {isHealthy ? "All Systems Operational" : "Degraded Service Performance"}
-              </span>
-            </div>
-          </div>
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 text-[11px] font-mono text-[#666666] flex flex-row items-center justify-between">
+          <span>MONITOR REFRESHED TIMELINE: {lastRefreshed || "JUST NOW"}</span>
+          <span className={health.status === "healthy" ? "text-[#16a34a]" : "text-[#dc2626]"}>
+            STATUS REPORT: {health.status.toUpperCase()}
+          </span>
         </div>
       )}
     </div>

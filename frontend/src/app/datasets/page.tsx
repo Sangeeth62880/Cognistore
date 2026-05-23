@@ -1,16 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Database,
-  Search,
-  Folder,
-  Calendar,
-  Sparkles,
-  RefreshCw,
-  AlertCircle,
-  Cpu,
-} from "lucide-react";
 import DatasetUploader from "../../components/DatasetUploader";
 import FeatureSuggestions from "../../components/FeatureSuggestions";
 
@@ -28,7 +18,6 @@ export default function DatasetsPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Active Discovery states
   const [activeDatasetId, setActiveDatasetId] = useState<string | null>(null);
   const [discoverySuggestions, setDiscoverySuggestions] = useState<any[]>([]);
   const [discovering, setDiscovering] = useState<boolean>(false);
@@ -87,7 +76,6 @@ export default function DatasetsPage() {
       const result = await response.json();
       setDiscoverySuggestions(result.suggestions);
       
-      // Smooth scroll to suggestions block
       setTimeout(() => {
         const elem = document.getElementById("feature-suggestions-container");
         if (elem) {
@@ -104,147 +92,126 @@ export default function DatasetsPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-full mx-auto font-sans">
       
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-          <Database className="h-6 w-6 text-cyan-400" /> Automatic Feature Discovery
-        </h1>
-        <p className="text-sm text-slate-400">
-          Upload offline training files, analyze card skewness, detect correlations, and let AI discover production-grade pandas features automatically.
+      <div className="border-b border-[#1f1f1f] pb-4">
+        <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider block">
+          AUTOMATIC FEATURE DISCOVERY
+        </span>
+        <p className="text-[13px] text-[#666666] leading-normal max-w-xl">
+          Upload training datasets, analyze schema correlation statistics, and automatically generate optimal features via LLM discovery.
         </p>
       </div>
 
-      {/* Primary Grid Layout */}
-      <div className="grid grid-cols-1 gap-8">
-        
-        {/* Upload Zone Component */}
-        <div className="rounded-2xl glass-panel p-6 space-y-4">
-          <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-            <Sparkles className="h-4.5 w-4.5 text-cyan-400" /> Ingest & Analyze New Dataset
-          </h3>
-          <DatasetUploader
-            apiKey={apiKey}
-            onDiscoverTriggered={handleDiscoverFeatures}
-          />
-        </div>
+      {/* Upload Zone */}
+      <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4">
+        <span className="text-[11px] font-bold text-[#e8e8e8] tracking-widest uppercase block">
+          INGEST NEW OFFLINE DATASET
+        </span>
+        <DatasetUploader
+          apiKey={apiKey}
+          onDiscoverTriggered={handleDiscoverFeatures}
+        />
+      </div>
 
-        {/* Discovery suggestions Container Panel */}
-        {(discovering || discoverySuggestions.length > 0) && (
-          <div id="feature-suggestions-container" className="rounded-2xl glass-panel p-6 space-y-6 scroll-mt-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800/80 pb-4 gap-4">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 uppercase tracking-wider">
-                  AI RECOMMENDATIONS
-                </span>
-                <h3 className="text-md font-bold text-slate-100 flex items-center gap-2">
-                  <Cpu className="h-5 w-5 text-cyan-400" /> Recommended ML Features
-                </h3>
-              </div>
-            </div>
-
-            {discovering ? (
-              <div className="p-12 text-center space-y-4">
-                <RefreshCw className="h-10 w-10 text-cyan-400 animate-spin mx-auto" />
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-slate-200">Claude is studying your schema...</h4>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                    Analyzing column relationships and data metrics to recommend 8 optimized, non-obvious features. (This takes 15-20 seconds).
-                  </p>
-                </div>
-              </div>
-            ) : (
-              activeDatasetId && (
-                <FeatureSuggestions
-                  suggestions={discoverySuggestions}
-                  datasetId={activeDatasetId}
-                  apiKey={apiKey}
-                />
-              )
-            )}
-          </div>
-        )}
-
-        {/* Historical upload registry list */}
-        <div className="rounded-2xl glass-panel p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
-              <Folder className="h-4.5 w-4.5 text-cyan-400" /> Upload History Registry
-            </h3>
-            <button
-              onClick={fetchUploadedDatasets}
-              disabled={loading}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-450 hover:text-slate-200 hover:border-slate-700 transition"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-            </button>
+      {/* AI Recommendations Stream Console */}
+      {(discovering || discoverySuggestions.length > 0) && (
+        <div id="feature-suggestions-container" className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4 scroll-mt-6">
+          <div className="border-b border-[#1f1f1f] pb-3">
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[2px] bg-[#2563eb]/10 border border-[#2563eb]/20 text-[#2563eb] uppercase tracking-wider font-mono">
+              AI DISCOVERY ENGINE Active
+            </span>
           </div>
 
-          {datasets.length === 0 ? (
-            <div className="p-8 text-center border border-dashed border-slate-800 rounded-xl bg-slate-900/10">
-              <p className="text-xs text-slate-500">No historical uploaded datasets found.</p>
+          {discovering ? (
+            <div className="py-12 text-center text-[#666666] font-mono text-xs">
+               공부 SCHEMA PIPELINES... GENERATING OPTIMIZED PANDAS FORMULAS...
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {datasets.map((dataset) => (
-                <div
-                  key={dataset.dataset_id}
-                  className="rounded-xl border border-slate-850 bg-slate-950/20 p-5 space-y-4 hover:border-cyan-500/30 transition-all duration-300 flex flex-col justify-between"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
-                          <Folder className="h-4.5 w-4.5" />
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-bold text-slate-200 truncate">{dataset.name}</h4>
-                          <span className="text-[9px] text-slate-500 font-mono truncate block max-w-[200px]">ID: {dataset.dataset_id}</span>
-                        </div>
-                      </div>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold ${
-                          dataset.is_processed
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse"
-                        }`}
-                      >
-                        {dataset.is_processed ? "Processed" : "Pending Ingestion"}
-                      </span>
-                    </div>
-
-                    <hr className="border-slate-900" />
-
-                    <div className="grid grid-cols-2 gap-4 text-[10px] text-slate-400 font-mono">
-                      <div className="space-y-0.5">
-                        <span>Row Count</span>
-                        <p className="text-xs font-bold text-slate-200">
-                          {dataset.row_count !== null ? dataset.row_count.toLocaleString() : "Analyzing"}
-                        </p>
-                      </div>
-                      <div className="space-y-0.5">
-                        <span>Uploaded</span>
-                        <p className="text-xs font-bold text-slate-250 flex items-center gap-1">
-                          <Calendar className="h-3 w-3 text-slate-500" /> {new Date(dataset.uploaded_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {dataset.is_processed && (
-                    <button
-                      onClick={() => handleDiscoverFeatures(dataset.dataset_id)}
-                      className="w-full mt-4 py-2 text-[10px] font-bold rounded-lg bg-cyan-600/10 border border-cyan-500/20 hover:bg-cyan-500/10 text-cyan-400 uppercase tracking-wider transition-all"
-                    >
-                      Analyze & Propose Features
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+            activeDatasetId && (
+              <FeatureSuggestions
+                suggestions={discoverySuggestions}
+                datasetId={activeDatasetId}
+                apiKey={apiKey}
+              />
+            )
           )}
         </div>
+      )}
+
+      {/* Upload History Table (Redesigned as Table instead of Cards) */}
+      <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-[#1f1f1f] pb-3">
+          <span className="text-[11px] font-bold text-[#666666] tracking-widest uppercase">
+            UPLOADED DATASETS REGISTRY
+          </span>
+          <button
+            onClick={fetchUploadedDatasets}
+            disabled={loading}
+            className="px-2 py-1 text-[10px] font-mono border border-[#1f1f1f] bg-transparent text-[#e8e8e8] rounded-[4px] hover:bg-[#161616]"
+          >
+            {loading ? "SYNCING..." : "SYNC"}
+          </button>
+        </div>
+
+        {datasets.length === 0 ? (
+          <div className="p-8 text-center text-[#444444] font-mono text-xs">
+            NO INGESTED HISTORICAL DATASETS FOUND.
+          </div>
+        ) : (
+          <div className="overflow-hidden border border-[#1f1f1f] rounded-[4px]">
+            <table className="dev-table">
+              <thead>
+                <tr>
+                  <th className="w-[30%]">Dataset Name</th>
+                  <th className="w-[25%]">Dataset ID</th>
+                  <th className="w-[12%]">Row Count</th>
+                  <th className="w-[13%]">Uploaded</th>
+                  <th className="w-[10%]">Status</th>
+                  <th className="w-[10%]">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {datasets.map((dataset) => (
+                  <tr key={dataset.dataset_id}>
+                    <td className="font-semibold text-[#e8e8e8]">{dataset.name}</td>
+                    <td className="font-mono text-[#666666] text-[11px]">{dataset.dataset_id}</td>
+                    <td className="font-mono text-[#a3e635] text-[11px]">
+                      {dataset.row_count !== null ? dataset.row_count.toLocaleString() : "PENDING"}
+                    </td>
+                    <td className="font-mono text-[#666666] text-[11px]">
+                      {new Date(dataset.uploaded_at).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <span
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded-[2px] text-[9px] font-bold uppercase font-mono ${
+                          dataset.is_processed
+                            ? "bg-[#16a34a]/10 text-[#16a34a] border border-[#16a34a]/15"
+                            : "bg-[#d97706]/10 text-[#d97706] border border-[#d97706]/15"
+                        }`}
+                      >
+                        {dataset.is_processed ? "PROCESSED" : "PENDING"}
+                      </span>
+                    </td>
+                    <td>
+                      {dataset.is_processed ? (
+                        <button
+                          onClick={() => handleDiscoverFeatures(dataset.dataset_id)}
+                          className="px-2 py-0.5 text-[10px] font-mono bg-[#2563eb] text-white rounded-[4px] hover:bg-[#2563eb]/90"
+                        >
+                          DISCOVER
+                        </button>
+                      ) : (
+                        <span className="text-[10px] font-mono text-[#444444] italic">WAITING</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

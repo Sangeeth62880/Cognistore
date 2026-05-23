@@ -1,16 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  AlertTriangle,
-  RefreshCw,
-  AlertCircle,
-  TrendingUp,
-  CheckCircle,
-  Shield,
-  Search,
-} from "lucide-react";
-import AlertCard from "../../components/AlertCard";
+import DriftChart from "../../components/DriftChart";
 
 interface AlertData {
   id: string;
@@ -44,10 +35,13 @@ export default function AlertsPage() {
   const [sweeping, setSweeping] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter States
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [resolvedFilter, setResolvedFilter] = useState<string>("active");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Expanded row tracking
+  const [expandedAlertId, setExpandedAlertId] = useState<string | null>(null);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
 
   const apiKey = "supersecretkeyreplaceinproduction";
 
@@ -63,7 +57,6 @@ export default function AlertsPage() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       
-      // Load Alert summary counts
       const summaryResp = await fetch(`${apiUrl}/alerts/summary`, {
         headers: getHeaders(),
       });
@@ -72,7 +65,6 @@ export default function AlertsPage() {
         setSummary(sumData);
       }
 
-      // Load full list
       const listResp = await fetch(`${apiUrl}/alerts?limit=100`, {
         headers: getHeaders(),
       });
@@ -111,8 +103,6 @@ export default function AlertsPage() {
 
       const sweepResult = await response.json();
       alert(`Drift sweep completed successfully. Checked ${sweepResult.features_checked} features. Found ${sweepResult.features_drifted} new drifts.`);
-      
-      // Refresh
       fetchAlerts();
     } catch (err: any) {
       console.error("Global drift sweep failed:", err);
@@ -122,29 +112,42 @@ export default function AlertsPage() {
     }
   };
 
-  const handleResolveSuccess = (alertId: string) => {
-    // Optimistically update list
-    setAlerts((prev) =>
-      prev.map((a) => (a.id === alertId ? { ...a, is_resolved: true } : a))
-    );
-    // Refresh summary
-    fetchAlerts();
+  const handleResolve = async (e: React.MouseEvent, alertId: string) => {
+    e.stopPropagation();
+    if (resolvingId) return;
+
+    setResolvingId(alertId);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/alerts/${alertId}/resolve`, {
+        method: "PATCH",
+        headers: getHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark alert as resolved.");
+      }
+
+      // Optimistically update
+      setAlerts((prev) =>
+        prev.map((a) => (a.id === alertId ? { ...a, is_resolved: true } : a))
+      );
+      fetchAlerts();
+    } catch (err) {
+      console.error("Failed to resolve alert:", err);
+      alert("Failed to resolve the alert. Please verify connection.");
+    } finally {
+      setResolvingId(null);
+    }
   };
 
-  // Client-side filtering logic
   const filteredAlerts = alerts.filter((alert) => {
-    // Search filter
-    const query = searchQuery.toLowerCase().trim();
-    if (query && !alert.feature_name.toLowerCase().includes(query)) {
+    if (searchQuery && !alert.feature_name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
-
-    // Severity filter
     if (severityFilter !== "all" && alert.severity.toLowerCase() !== severityFilter) {
       return false;
     }
-
-    // Resolved filter
     if (resolvedFilter === "active" && alert.is_resolved) return false;
     if (resolvedFilter === "resolved" && !alert.is_resolved) return false;
 
@@ -152,170 +155,272 @@ export default function AlertsPage() {
   });
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-full mx-auto font-sans">
       
-      {/* Header and Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            <AlertTriangle className="h-6 w-6 text-rose-500 font-bold" /> Drift & Quality Alerts
-          </h1>
-          <p className="text-sm text-slate-400">
-            Real-time notifications regarding feature distribution changes, statistical drift thresholds, and pipeline quality anomalies.
+      {/* Top Header Section */}
+      <div className="flex flex-row items-center justify-between border-b border-[#1f1f1f] pb-4">
+        <div className="space-y-1">
+          <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider block">
+            DRIFT & ANOMALY LOGS
+          </span>
+          <p className="text-[13px] text-[#666666] leading-normal max-w-xl">
+            Audit covariate drift alerts, Population Stability Index shifts, and execute ML retraining remedies.
           </p>
         </div>
         
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={fetchAlerts}
             disabled={loading}
-            className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-450 hover:text-slate-200 hover:border-slate-700 transition"
+            className="px-3 py-1.5 text-xs font-mono border border-[#1f1f1f] bg-transparent text-[#e8e8e8] rounded-[4px] hover:bg-[#161616] hover:border-[#666666] transition-colors duration-150"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            {loading ? "SYNCING..." : "SYNC"}
           </button>
           
           <button
             onClick={handleGlobalSweep}
             disabled={sweeping}
-            className="px-5 py-2.5 text-sm font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 shadow flex items-center justify-center gap-1.5 transition"
+            className="px-3 py-1.5 text-xs font-mono bg-[#2563eb] text-white rounded-[4px] hover:bg-[#2563eb]/90 transition-colors duration-150"
           >
-            {sweeping ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin text-rose-500" /> Sweeping...
-              </>
-            ) : (
-              <>
-                <Shield className="h-4 w-4 text-rose-500" /> Run Quality Check
-              </>
-            )}
+            {sweeping ? "RUNNING CHECK..." : "RUN SWEEP CHECK"}
           </button>
         </div>
       </div>
 
-      {/* Error Alert Display */}
       {error && (
-        <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-5 flex items-start gap-3.5 glow-red">
-          <AlertCircle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-rose-300">Sweep / Monitoring Failure</h3>
-            <p className="text-xs text-rose-400/90 leading-relaxed">{error}</p>
-          </div>
+        <div className="rounded-[4px] border border-[#dc2626] bg-[#dc2626]/5 p-4 text-[12px] font-mono text-[#dc2626]">
+          [ERROR] Sweep monitoring failed: {error}
         </div>
       )}
 
-      {/* Summary Statistics Widgets */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        
-        {/* Total Events */}
-        <div className="rounded-2xl glass-panel p-6 space-y-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Inspected Events</span>
-          <h3 className="text-2xl font-black text-slate-100 font-mono">
-            {summary.total_alerts}
-          </h3>
-          <p className="text-xs text-slate-500 leading-normal">
-            Total active anomalies recorded inside monitoring logs directory.
-          </p>
+      {/* 3-Column flat KPI Aggregates */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col justify-between h-[80px]">
+          <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block">TOTAL ANOMALIES LOGGED</span>
+          <span className="text-2xl font-bold font-mono text-[#e8e8e8]">{summary.total_alerts}</span>
         </div>
 
-        {/* Severity Metrics */}
-        <div className="rounded-2xl glass-panel p-6 space-y-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Anomalies Detected</span>
-          <div className="flex items-baseline gap-3">
-            <span className="text-2xl font-black text-rose-400 font-mono">{summary.high_severity_count}</span>
-            <span className="text-xs text-rose-500 font-semibold uppercase">High</span>
-            <span className="text-2xl font-black text-amber-400 font-mono ml-2">{summary.medium_severity_count}</span>
-            <span className="text-xs text-amber-500 font-semibold uppercase">Med</span>
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col justify-between h-[80px]">
+          <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block">SEVERITY RATIOS</span>
+          <div className="flex items-center gap-3 font-mono text-[11px] font-bold">
+            <span className="text-[#dc2626]">{summary.high_severity_count} HIGH</span>
+            <span className="text-[#666666]">/</span>
+            <span className="text-[#d97706]">{summary.medium_severity_count} MED</span>
           </div>
-          <p className="text-xs text-slate-500 leading-normal">
-            Drift severity distribution counts parsed from PSI analysis.
-          </p>
         </div>
 
-        {/* Resolution Rates */}
-        <div className="rounded-2xl glass-panel p-6 space-y-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Resolution Status</span>
-          <h3 className="text-2xl font-black text-emerald-400 font-mono flex items-center gap-1.5">
-            <TrendingUp className="h-5 w-5" /> {summary.resolution_rate}%
-          </h3>
-          <p className="text-xs text-slate-500 leading-normal">
-            Remediation completion rate for feature covariate drifts.
-          </p>
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col justify-between h-[80px]">
+          <span className="text-[10px] font-bold text-[#666666] uppercase tracking-widest block">DRIFT REMEDIATION RATE</span>
+          <span className="text-2xl font-bold font-mono text-[#a3e635]">{summary.resolution_rate.toFixed(1)}%</span>
         </div>
       </div>
 
-      {/* Search and Filters panel */}
-      <div className="flex flex-col sm:flex-row gap-4 border-b border-slate-800 pb-4">
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Search features by name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-900/60 border border-slate-800 focus:border-rose-500 rounded-xl outline-none text-slate-200 transition-all placeholder:text-slate-500"
-          />
-        </div>
+      {/* Filter and Search */}
+      <div className="flex flex-col sm:flex-row gap-4 border-b border-[#1f1f1f] pb-4">
+        <input
+          type="text"
+          placeholder="Filter alerts by feature name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1 px-3 py-1.5 text-xs bg-[#111111] border border-[#1f1f1f] rounded-[4px] outline-none text-[#e8e8e8] font-mono placeholder:text-[#444444]"
+        />
 
-        {/* Severity filter */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase shrink-0">Severity:</span>
-          {["all", "high", "medium"].map((sev) => (
-            <button
-              key={sev}
-              onClick={() => setSeverityFilter(sev)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition ${
-                severityFilter === sev
-                  ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                  : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              {sev}
-            </button>
-          ))}
-        </div>
+        <div className="flex items-center gap-4 font-mono text-[11px]">
+          <div className="flex items-center gap-2">
+            <span className="text-[#666666] uppercase">SEVERITY:</span>
+            {["all", "high", "medium"].map((sev) => (
+              <button
+                key={sev}
+                onClick={() => setSeverityFilter(sev)}
+                className={`px-2 py-0.5 rounded-[2px] transition ${
+                  severityFilter === sev ? "bg-[#2563eb] text-white" : "text-[#666666] hover:text-[#e8e8e8]"
+                }`}
+              >
+                {sev.toUpperCase()}
+              </button>
+            ))}
+          </div>
 
-        {/* Resolve filter */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold text-slate-500 uppercase shrink-0">Status:</span>
-          {["active", "resolved", "all"].map((res) => (
-            <button
-              key={res}
-              onClick={() => setResolvedFilter(res)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition ${
-                resolvedFilter === res
-                  ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
-                  : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              {res}
-            </button>
-          ))}
+          <div className="flex items-center gap-2 border-l border-[#1f1f1f] pl-4">
+            <span className="text-[#666666] uppercase">STATUS:</span>
+            {["active", "resolved", "all"].map((res) => (
+              <button
+                key={res}
+                onClick={() => setResolvedFilter(res)}
+                className={`px-2 py-0.5 rounded-[2px] transition ${
+                  resolvedFilter === res ? "bg-[#2563eb] text-white" : "text-[#666666] hover:text-[#e8e8e8]"
+                }`}
+              >
+                {res.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Alerts Checklist Cards */}
-      <div className="space-y-4">
-        {loading && alerts.length === 0 ? (
-          <div className="p-12 text-center text-xs text-slate-500 rounded-2xl border border-slate-850">
-            <RefreshCw className="h-6 w-6 animate-spin mx-auto text-rose-400 mb-2" />
-            Loading alert monitors...
-          </div>
-        ) : filteredAlerts.length === 0 ? (
-          <div className="p-12 text-center text-xs text-slate-500 border border-dashed border-slate-850 bg-slate-900/10 rounded-2xl">
-            <CheckCircle className="h-8 w-8 text-emerald-400 animate-pulse mx-auto mb-2" />
-            No active drift alerts found matching current filters.
-          </div>
-        ) : (
-          filteredAlerts.map((alert) => (
-            <AlertCard
-              key={alert.id}
-              alert={alert}
-              onResolveSuccess={handleResolveSuccess}
-              apiKey={apiKey}
-            />
-          ))
-        )}
+      {/* Main Alerts Table */}
+      <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] overflow-hidden">
+        <table className="dev-table">
+          <thead>
+            <tr>
+              <th className="w-[30%]">Feature Name</th>
+              <th className="w-[12%]">Severity</th>
+              <th className="w-[12%]">PSI Score</th>
+              <th className="w-[13%]">KL Divergence</th>
+              <th className="w-[15%]">Detected At</th>
+              <th className="w-[10%]">Status</th>
+              <th className="w-[8%]">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && alerts.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="p-12 text-center text-[#666666] font-mono">
+                  RETRIEVING MONITORING LOGS...
+                </td>
+              </tr>
+            ) : filteredAlerts.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="p-12 text-center text-[#444444] font-mono">
+                  NO DRIFT ANOMALIES CURRENTLY RECORDED IN LOGS.
+                </td>
+              </tr>
+            ) : (
+              filteredAlerts.map((alert) => {
+                const isExpanded = expandedAlertId === alert.id;
+                const corr = alert.upstream_correlation || {};
+                const psi = corr.psi ?? 0.0;
+                const klDiv = corr.kl_divergence ?? 0.0;
+                const baselineStats = corr.baseline_stats || {};
+                const currentStats = corr.current_stats || {};
+                const driftType = corr.drift_type || "Covariate Drift";
+
+                const isHigh = alert.severity.toLowerCase() === "high";
+
+                return (
+                  <React.Fragment key={alert.id}>
+                    <tr
+                      onClick={() => setExpandedAlertId(isExpanded ? null : alert.id)}
+                      className="cursor-pointer"
+                    >
+                      {/* Feature Name */}
+                      <td className="font-mono text-[#e8e8e8] font-bold">
+                        {alert.feature_name}
+                      </td>
+
+                      {/* Severity (text color only) */}
+                      <td className={`font-mono font-bold text-[11px] uppercase ${isHigh ? "text-[#dc2626]" : "text-[#d97706]"}`}>
+                        {alert.severity}
+                      </td>
+
+                      {/* PSI (lime monospace) */}
+                      <td className="font-mono text-[#a3e635] text-[11px] font-semibold">
+                        {psi.toFixed(4)}
+                      </td>
+
+                      {/* KL Divergence */}
+                      <td className="font-mono text-[#666666] text-[11px]">
+                        {klDiv.toFixed(4)}
+                      </td>
+
+                      {/* Detected timestamp */}
+                      <td className="font-mono text-[#666666] text-[11px]">
+                        {new Date(alert.detected_at).toLocaleString()}
+                      </td>
+
+                      {/* Status Badges */}
+                      <td>
+                        <span
+                          className={`inline-flex px-1.5 py-0.5 rounded-[2px] text-[9px] font-bold uppercase font-mono border ${
+                            alert.is_resolved
+                              ? "bg-[#16a34a]/10 text-[#16a34a] border-[#16a34a]/15"
+                              : "bg-[#dc2626]/10 text-[#dc2626] border-[#dc2626]/15"
+                          }`}
+                        >
+                          {alert.is_resolved ? "RESOLVED" : "ACTIVE"}
+                        </span>
+                      </td>
+
+                      {/* Action trigger */}
+                      <td>
+                        {!alert.is_resolved ? (
+                          <button
+                            onClick={(e) => handleResolve(e, alert.id)}
+                            disabled={resolvingId === alert.id}
+                            className="px-2 py-0.5 text-[10px] font-mono bg-[#16a34a] text-white rounded-[4px] hover:bg-[#16a34a]/90 disabled:opacity-50"
+                          >
+                            {resolvingId === alert.id ? "RESOLVING" : "RESOLVE"}
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-[#444444] font-mono italic">CLOSED</span>
+                        )}
+                      </td>
+                    </tr>
+
+                    {/* Inline row expansion details */}
+                    {isExpanded && (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          className="p-5 bg-[#161616] border-t border-b border-[#1f1f1f] text-[#666666] font-mono leading-normal"
+                        >
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Descriptive analysis block */}
+                            <div className="space-y-4 text-xs font-mono">
+                              <div className="space-y-1">
+                                <span className="text-[10px] text-[#444444] font-bold uppercase tracking-wider block">
+                                  COVARIATE DRIFT ANALYSIS DETAILS:
+                                </span>
+                                <p className="text-[#e8e8e8] text-xs">{alert.explanation}</p>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="p-3 bg-[#111111] border border-[#1f1f1f] rounded-[4px]">
+                                  <span className="text-[#444444] text-[9px] block">DRIFT SPECIATION</span>
+                                  <span className="text-[#e8e8e8] text-xs font-bold">{driftType}</span>
+                                </div>
+                                <div className="p-3 bg-[#111111] border border-[#1f1f1f] rounded-[4px]">
+                                  <span className="text-[#444444] text-[9px] block">POPULATION INSTABILITY</span>
+                                  <span className="text-[#a3e635] text-xs font-bold">PSI {psi.toFixed(4)}</span>
+                                </div>
+                              </div>
+
+                              <div className="p-3 bg-[#111111] border border-[#1f1f1f] rounded-[4px] space-y-1">
+                                <span className="text-[#444444] text-[9px] block">PROBABLE ROOT CAUSE</span>
+                                <p className="text-[#666666] text-xs leading-relaxed">{corr.likely_cause || "No metrics matched."}</p>
+                              </div>
+
+                              <div className="p-3 bg-[#111111] border border-[#dc2626]/20 rounded-[4px] space-y-1">
+                                <span className="text-[#dc2626] text-[9px] block">PROPOSED AI REMEDIAL FIX</span>
+                                <p className="text-[#e8e8e8] text-xs leading-relaxed">{alert.suggested_fix}</p>
+                              </div>
+                            </div>
+
+                            {/* Probability density chart column */}
+                            {baselineStats && currentStats && Object.keys(baselineStats).length > 0 && (
+                              <div className="space-y-2">
+                                <span className="text-[10px] text-[#444444] font-bold uppercase tracking-wider block">
+                                  COVARIATE PROBABILITY DENSITY CURVES:
+                                </span>
+                                <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-3">
+                                  <DriftChart
+                                    baselineStats={baselineStats}
+                                    currentStats={currentStats}
+                                    psi={psi}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

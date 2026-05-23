@@ -3,22 +3,14 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import {
-  Sparkles,
-  Layers,
-  Brain,
-  AlertTriangle,
-  ChevronRight,
-  Gauge,
-} from "lucide-react";
 import MetricsCards from "./MetricsCards";
 import LiveFeed from "./LiveFeed";
 
@@ -33,7 +25,7 @@ export default function Dashboard() {
     cache_hit_rate: 100.0,
     recent_latencies: [],
   });
-  
+
   const [events, setEvents] = useState<any[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "connecting" | "disconnected">("connecting");
 
@@ -73,7 +65,6 @@ export default function Dashboard() {
 
         socket.onclose = () => {
           setConnectionStatus("disconnected");
-          // Attempt automatic reconnection every 5 seconds
           if (!reconnectTimer) {
             reconnectTimer = setInterval(connectWebSocket, 5000);
           }
@@ -105,143 +96,105 @@ export default function Dashboard() {
     };
   }, []);
 
-  // Format Recharts Latency Timeline curves
+  // Format Recharts Latency curves: flat solid blue line, no filled area, no gradients
   const chartData = (metrics.recent_latencies || []).map((lat: number, idx: number) => ({
     query: idx + 1,
-    "Latency (ms)": Number(lat.toFixed(2)),
+    latency: Number(lat.toFixed(2)),
   }));
 
   const quickActions = [
-    {
-      label: "Define NL Feature",
-      description: "Generate features using plain English.",
-      href: "/features/new",
-      icon: <Sparkles className="h-4.5 w-4.5 text-cyan-400" />,
-      borderHover: "hover:border-cyan-500/30",
-    },
-    {
-      label: "Upload Offline Dataset",
-      description: "Analyze schema correlations and nulls.",
-      href: "/datasets",
-      icon: <Layers className="h-4.5 w-4.5 text-violet-400" />,
-      borderHover: "hover:border-violet-500/30",
-    },
-    {
-      label: "Log Model Deployments",
-      description: "Audit schemas and link features to models.",
-      href: "/models",
-      icon: <Brain className="h-4.5 w-4.5 text-emerald-400" />,
-      borderHover: "hover:border-emerald-500/30",
-    },
-    {
-      label: "Audit Statistical Drift",
-      description: "Examine PSI curves and AI remedies.",
-      href: "/alerts",
-      icon: <AlertTriangle className="h-4.5 w-4.5 text-rose-450" />,
-      borderHover: "hover:border-rose-500/30",
-    },
+    { label: "Define NL Feature", href: "/features/new" },
+    { label: "Upload Offline Dataset", href: "/datasets" },
+    { label: "Log Model Deployments", href: "/models" },
+    { label: "Audit Statistical Drift", href: "/alerts" },
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-full mx-auto">
       
-      {/* Metrics Card Row */}
+      {/* 1. Metrics Card Row */}
       <MetricsCards metrics={metrics} />
 
-      {/* Analytics timeline and live feed split grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* 2. Live Feed & Latency Chart Grid (40% / 60%) */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         
-        {/* Left Column: WebSocket Event Feed */}
-        <LiveFeed events={events} connectionStatus={connectionStatus} />
+        {/* Left Column: WS live feed (40% / Col-span 4) */}
+        <div className="lg:col-span-4">
+          <LiveFeed events={events} connectionStatus={connectionStatus} />
+        </div>
 
-        {/* Right Column: Recharts Serving Latency Graph */}
-        <div className="lg:col-span-2 rounded-2xl glass-panel p-5 space-y-4 hover:border-slate-800/80 transition-colors flex flex-col h-[380px]">
-          <div className="flex justify-between items-center border-b border-slate-900 pb-3 shrink-0">
-            <h3 className="text-xs font-bold text-slate-200 flex items-center gap-2">
-              <Gauge className="h-4 w-4 text-cyan-400" /> Serving Latency Timeline
-            </h3>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
-              Last {chartData.length} serve requests
+        {/* Right Column: Latency Chart (60% / Col-span 6) */}
+        <div className="lg:col-span-6 bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col h-[350px]">
+          <div className="flex justify-between items-center border-b border-[#1f1f1f] pb-2 shrink-0">
+            <span className="text-[11px] font-bold text-[#666666] tracking-widest uppercase">
+              LATENCY TIMELINE
+            </span>
+            <span className="text-[9px] font-mono text-[#444444] uppercase tracking-wider">
+              {chartData.length} SERVING SAMPLES
             </span>
           </div>
 
-          <div className="flex-1 w-full min-h-0 pt-2">
+          <div className="flex-1 w-full min-h-0 pt-3">
             {chartData.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center text-slate-500 text-[11px]">
-                No recent serving latencies recorded. Trigger some GET /serve requests.
+              <div className="h-full flex items-center justify-center text-center text-[#444444] text-[11px] font-mono">
+                NO LATENCY TRAFFIC RECORDED IN BUFFER.
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorLatency" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.3} />
+                <LineChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="0" stroke="#1f1f1f" />
                   <XAxis
                     dataKey="query"
-                    stroke="#64748b"
-                    fontSize={9}
+                    stroke="#444444"
+                    fontSize={10}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
-                    stroke="#64748b"
-                    fontSize={9}
+                    stroke="#444444"
+                    fontSize={10}
                     tickLine={false}
                     axisLine={false}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#020617",
-                      borderColor: "#1e293b",
-                      borderRadius: "8px",
-                      fontSize: "10px",
+                      backgroundColor: "#111111",
+                      borderColor: "#1f1f1f",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                      fontFamily: "monospace",
                     }}
-                    itemStyle={{ fontSize: "10px" }}
-                    labelStyle={{ fontSize: "10px", fontWeight: "bold", color: "#94a3b8" }}
-                    labelFormatter={(value) => `Query Index: ${value}`}
+                    itemStyle={{ color: "#e8e8e8" }}
+                    labelFormatter={(label) => `SAMPLE: ${label}`}
                   />
-                  <Area
+                  <Line
                     type="monotone"
-                    dataKey="Latency (ms)"
-                    stroke="#06b6d4"
+                    dataKey="latency"
+                    stroke="#2563eb"
                     strokeWidth={1.5}
-                    fillOpacity={1}
-                    fill="url(#colorLatency)"
+                    dot={false}
+                    activeDot={{ r: 4, fill: "#2563eb", stroke: "#111111", strokeWidth: 2 }}
                   />
-                </AreaChart>
+                </LineChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
       </div>
 
-      {/* Quick Actions bottom panel */}
-      <div className="space-y-4">
-        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-          Feature Store Quick Actions
-        </h4>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 3. Quick Actions Plain Text List Row */}
+      <div className="pt-4 border-t border-[#1f1f1f] flex flex-col sm:flex-row sm:items-center gap-4">
+        <span className="text-[11px] font-bold text-[#666666] tracking-widest uppercase">
+          QUICK ACTIONS:
+        </span>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           {quickActions.map((action, idx) => (
             <Link
               key={idx}
               href={action.href}
-              className={`rounded-2xl glass-panel p-5 space-y-2 border border-slate-850 bg-slate-950/20 block hover:bg-slate-900/10 cursor-pointer transition-all duration-300 ${action.borderHover}`}
+              className="text-[13px] font-medium text-[#2563eb] hover:text-[#e8e8e8] transition-colors duration-150"
             >
-              <div className="flex justify-between items-center">
-                <div className="p-2 bg-slate-900 border border-slate-800 rounded-xl">
-                  {action.icon}
-                </div>
-                <ChevronRight className="h-4 w-4 text-slate-600 shrink-0" />
-              </div>
-              <div className="space-y-1 pt-1">
-                <h4 className="text-xs font-bold text-slate-200">{action.label}</h4>
-                <p className="text-[10px] text-slate-500 leading-normal">{action.description}</p>
-              </div>
+              {action.label} &rarr;
             </Link>
           ))}
         </div>

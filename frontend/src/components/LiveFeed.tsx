@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { RefreshCw, Radio, CheckCircle, Database, Zap } from "lucide-react";
 
 interface ServingEvent {
   timestamp: string;
@@ -22,7 +21,6 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
   const [hovered, setHovered] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll logic: scroll to top since newest are loaded at index 0
   useEffect(() => {
     if (!hovered && containerRef.current) {
       containerRef.current.scrollTo({
@@ -32,37 +30,19 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
     }
   }, [events, hovered]);
 
-  const connectionBadge = () => {
-    const configs: Record<string, { label: string; color: string; dotClass: string }> = {
-      connected: {
-        label: "Connected",
-        color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-        dotClass: "bg-emerald-400 animate-ping",
-      },
-      connecting: {
-        label: "Syncing",
-        color: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-        dotClass: "bg-amber-400 animate-pulse",
-      },
-      disconnected: {
-        label: "Offline",
-        color: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-        dotClass: "bg-rose-400",
-      },
+  const connectionIndicator = () => {
+    const statuses: Record<string, { label: string; bg: string }> = {
+      connected: { label: "CONNECTED", bg: "bg-[#16a34a]" },
+      connecting: { label: "CONNECTING", bg: "bg-[#d97706]" },
+      disconnected: { label: "OFFLINE", bg: "bg-[#dc2626]" },
     };
-
-    const cfg = configs[connectionStatus] || configs.disconnected;
+    const current = statuses[connectionStatus] || statuses.disconnected;
 
     return (
-      <span
-        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase border tracking-wider transition ${cfg.color}`}
-      >
-        <span className="relative flex h-2 w-2">
-          <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${cfg.dotClass}`}></span>
-          <span className={`relative inline-flex rounded-full h-2 w-2 ${cfg.dotClass.split(" ")[0]}`}></span>
-        </span>
-        {cfg.label}
-      </span>
+      <div className="flex items-center gap-1.5 font-mono text-[9px] text-[#666666] tracking-wider">
+        <span className={`h-1.5 w-1.5 rounded-full ${current.bg}`} />
+        <span>{current.label}</span>
+      </div>
     );
   };
 
@@ -70,77 +50,62 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="rounded-2xl glass-panel p-5 space-y-4 flex flex-col h-[380px] hover:border-slate-800/80 transition-colors"
+      className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] p-4 flex flex-col h-[350px] font-mono"
     >
-      {/* Title block */}
-      <div className="flex justify-between items-center border-b border-slate-900 pb-3 shrink-0">
-        <h3 className="text-xs font-bold text-slate-200 flex items-center gap-2">
-          <Radio className="h-4 w-4 text-rose-500 animate-pulse" /> Live Telemetry Feed
-        </h3>
-        {connectionBadge()}
+      {/* Header */}
+      <div className="flex justify-between items-center border-b border-[#1f1f1f] pb-2 shrink-0">
+        <span className="text-[11px] font-bold text-[#666666] tracking-widest">
+          LIVE SERVE TELEMETRY
+        </span>
+        {connectionIndicator()}
       </div>
 
-      {/* Auto-scrolling Timeline area */}
+      {/* Events Streams Console */}
       <div
         ref={containerRef}
-        className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin scrollbar-thumb-slate-800"
+        className="flex-1 overflow-y-auto pr-1 py-2 space-y-[4px] text-[12px] leading-relaxed scrollbar-thin scrollbar-thumb-slate-800"
       >
         {events.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center text-slate-500 text-[11px]">
-            {connectionStatus === "connecting" ? (
-              <>
-                <RefreshCw className="h-5 w-5 animate-spin text-amber-500 mb-2" />
-                Listening for microservice serve traffic...
-              </>
-            ) : (
-              <>
-                <CheckCircle className="h-5 w-5 text-slate-700 mb-1" />
-                No serving requests detected yet.
-              </>
-            )}
+          <div className="h-full flex flex-col items-center justify-center text-[#444444] text-[11px]">
+            {connectionStatus === "connecting"
+              ? "CONNECTING TO SERVING WEBSOCKET..."
+              : "NO SYSTEM TRAFFIC DETECTED."}
           </div>
         ) : (
           events.map((evt, idx) => {
             const isCache = evt.source.toLowerCase() === "cache";
+            
+            // Format time as hh:mm:ss
+            let timeStr = "";
+            try {
+              const dt = new Date(evt.timestamp);
+              timeStr = dt.toTimeString().split(" ")[0];
+            } catch (_) {
+              timeStr = "--:--:--";
+            }
+
             return (
               <div
                 key={idx}
-                className="p-3 bg-slate-950/40 hover:bg-slate-900/30 border border-slate-900 hover:border-slate-850 rounded-xl text-[11px] leading-relaxed transition-all duration-300 flex justify-between items-center gap-4 animate-in slide-in-from-top-2 duration-300"
+                className="py-1.5 px-2 hover:bg-[#161616] border-b border-[#1f1f1f]/50 flex justify-between items-center text-[11px]"
               >
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <Database className="h-3 w-3 text-cyan-400 shrink-0" />
-                    <span className="font-bold text-slate-200 font-mono truncate block">
-                      {evt.feature_name}
-                    </span>
-                  </div>
-                  <div className="text-slate-500 flex items-center gap-1 font-mono text-[9px]">
-                    entity: <span className="text-slate-400">{evt.entity_id}</span>
-                  </div>
+                <div className="flex items-center gap-2 truncate min-w-0">
+                  <span className="text-[#444444] shrink-0 font-semibold">{timeStr}</span>
+                  <span className="text-[#e8e8e8] font-semibold truncate">
+                    {evt.feature_name}
+                  </span>
+                  <span className="text-[#444444] shrink-0">
+                    id:{evt.entity_id}
+                  </span>
                 </div>
 
-                <div className="text-right shrink-0 space-y-1">
-                  <span
-                    className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-bold font-mono border ${
-                      isCache
-                        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/15"
-                        : "bg-amber-500/10 text-amber-450 border-amber-500/15"
-                    }`}
-                  >
-                    {isCache ? (
-                      <>
-                        <CheckCircle className="h-2.5 w-2.5" /> cache
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="h-2.5 w-2.5" /> db
-                      </>
-                    )}
+                <div className="flex items-center gap-2 shrink-0 pl-2">
+                  <span className={`text-[10px] uppercase font-bold ${isCache ? "text-[#16a34a]" : "text-[#d97706]"}`}>
+                    {isCache ? "CACHE" : "DB"}
                   </span>
-                  
-                  <div className="text-[10px] font-bold text-slate-300 font-mono">
-                    {evt.latency_ms.toFixed(1)} ms
-                  </div>
+                  <span className="text-[#a3e635] font-semibold">
+                    {evt.latency_ms.toFixed(1)}ms
+                  </span>
                 </div>
               </div>
             );
@@ -149,9 +114,9 @@ export default function LiveFeed({ events, connectionStatus }: LiveFeedProps) {
       </div>
 
       {hovered && events.length > 0 && (
-        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 text-center shrink-0 animate-pulse">
-          Timeline Paused (Release hover to resume scrolling)
-        </span>
+        <div className="text-[9px] text-[#444444] text-center pt-2 border-t border-[#1f1f1f] tracking-widest font-semibold">
+          CONSOLE STREAM PAUSED
+        </div>
       )}
     </div>
   );

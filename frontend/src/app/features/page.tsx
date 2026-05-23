@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Cpu, Search, Plus, Filter, Tag, RefreshCw, AlertCircle } from "lucide-react";
 
 interface FeatureItem {
   id: string;
@@ -57,7 +56,6 @@ export default function FeaturesPage() {
     return Object.keys(tags).filter((k) => tags[k] === true);
   };
 
-  // Filter features based on search query
   const filteredFeatures = features.filter((feat) => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
@@ -72,132 +70,111 @@ export default function FeaturesPage() {
   });
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-full mx-auto font-sans">
       
-      {/* Header and Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-            <Cpu className="h-6 w-6 text-violet-400 font-bold" /> Feature Registry
-          </h1>
-          <p className="text-sm text-slate-400">
-            Define, register, and serve machine learning features across offline and online stores.
+      {/* Top Header Section */}
+      <div className="flex flex-row items-center justify-between border-b border-[#1f1f1f] pb-4">
+        <div className="space-y-1">
+          <span className="text-[11px] font-mono text-[#666666] uppercase tracking-wider block">
+            FEATURE STORE REGISTRY
+          </span>
+          <p className="text-[13px] text-[#666666] leading-normal max-w-xl">
+            Register and serve machine learning features across offline training and online prediction stores.
           </p>
         </div>
         
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={fetchFeatures}
             disabled={loading}
-            className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-450 hover:text-slate-200 hover:border-slate-700 transition"
+            className="px-3 py-1.5 text-xs font-mono border border-[#1f1f1f] bg-transparent text-[#e8e8e8] rounded-[4px] hover:bg-[#111111] hover:border-[#666666] transition-colors duration-150"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            {loading ? "SYNCING..." : "SYNC REGISTRY"}
           </button>
           
           <Link href="/features/new">
-            <button className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 transition-all shrink-0">
-              <Plus className="h-4 w-4" /> Register Feature
+            <button className="px-3 py-1.5 text-xs font-mono bg-[#2563eb] text-white rounded-[4px] hover:bg-[#2563eb]/90 transition-colors duration-150">
+              CREATE FEATURE
             </button>
           </Link>
         </div>
       </div>
 
-      {/* Error Alert Display */}
+      {/* Error Panel */}
       {error && (
-        <div className="rounded-xl border border-rose-900/50 bg-rose-950/20 p-5 flex items-start gap-3.5 glow-red">
-          <AlertCircle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-rose-300">Connection Error</h3>
-            <p className="text-xs text-rose-400/90 leading-relaxed">{error}</p>
-          </div>
+        <div className="rounded-[4px] border border-[#dc2626] bg-[#dc2626]/5 p-4 text-[12px] font-mono text-[#dc2626]">
+          [ERROR] Connection failure: {error}
         </div>
       )}
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Search features by name, entity type, tags, description..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 text-sm bg-slate-900/60 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 rounded-xl outline-none text-slate-200 transition-all placeholder:text-slate-500"
-          />
-        </div>
-        <button className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl bg-slate-900/60 border border-slate-800 text-slate-300 hover:bg-slate-800/60 transition-colors">
-          <Filter className="h-4 w-4" /> Filters
-        </button>
+      {/* Search Bar */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="Filter features by name, entity, tags..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1 px-3 py-1.5 text-xs bg-[#111111] border border-[#1f1f1f] rounded-[4px] outline-none text-[#e8e8e8] font-mono focus:border-[#2563eb] placeholder:text-[#444444]"
+        />
       </div>
 
-      {/* Features List Table */}
-      <div className="rounded-2xl glass-panel p-6">
-        <div className="overflow-x-auto border border-slate-800/80 bg-slate-900/30 rounded-xl">
-          <table className="min-w-full divide-y divide-slate-800">
-            <thead>
-              <tr className="bg-slate-900/60">
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Feature Details
-                </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Entity
-                </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Tags
-                </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Version
-                </th>
+      {/* Main Table Container */}
+      <div className="bg-[#111111] border border-[#1f1f1f] rounded-[4px] overflow-hidden">
+        <table className="dev-table">
+          <thead>
+            <tr>
+              <th className="w-[35%]">Feature Name</th>
+              <th className="w-[30%]">Description</th>
+              <th className="w-[12%]">Entity</th>
+              <th className="w-[15%]">Tags</th>
+              <th className="w-[8%]">Version</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && features.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="p-12 text-center text-[#666666] font-mono">
+                  RETRIEVING REGISTERED SCHEMAS...
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-350">
-              {loading && features.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-12 text-center text-xs text-slate-500">
-                    <RefreshCw className="h-6 w-6 animate-spin mx-auto text-violet-400 mb-2" />
-                    Loading registered features...
-                  </td>
-                </tr>
-              ) : filteredFeatures.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-12 text-center text-xs text-slate-500">
-                    No active features found matching the description or filters.
-                  </td>
-                </tr>
-              ) : (
-                filteredFeatures.map((feat) => {
-                  const tags = getTagsList(feat.tags);
-                  return (
-                    <tr key={feat.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          <span className="text-sm font-semibold text-slate-200 block">{feat.name}</span>
-                          <span className="text-xs text-slate-400 block max-w-xl">{feat.description || "No description provided."}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-slate-300 uppercase font-mono">
-                        {feat.entity_type}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1.5">
-                          {tags.map((tag) => (
-                            <span key={tag} className="inline-flex items-center gap-1 rounded-md bg-slate-800 border border-slate-700 px-2 py-0.5 text-[10px] text-slate-350 font-medium capitalize">
-                              <Tag className="h-2.5 w-2.5 text-violet-400" /> {tag}
-                            </span>
-                          ))}
-                          {tags.length === 0 && <span className="text-xs text-slate-655 font-mono italic">No tags</span>}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm font-mono text-slate-400">
-                        v{feat.version}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+            ) : filteredFeatures.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="p-12 text-center text-[#444444] font-mono">
+                  NO FEATURE SCHEMAS FOUND IN REGISTRY.
+                </td>
+              </tr>
+            ) : (
+              filteredFeatures.map((feat) => {
+                const tags = getTagsList(feat.tags);
+                return (
+                  <tr key={feat.id}>
+                    <td className="font-mono text-[#e8e8e8] font-semibold">{feat.name}</td>
+                    <td className="text-[#666666] text-xs leading-normal">{feat.description || "No description provided."}</td>
+                    <td className="font-mono text-[#a3e635] text-[11px] uppercase">{feat.entity_type}</td>
+                    <td>
+                      <div className="flex flex-wrap gap-1">
+                        {tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-flex items-center px-1.5 py-0.5 rounded-[2px] bg-[#161616] border border-[#1f1f1f] text-[9px] font-mono text-[#666666] uppercase"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                        {tags.length === 0 && (
+                          <span className="text-[10px] text-[#444444] font-mono italic">NONE</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="font-mono text-[#a3e635] text-[11px] font-semibold">
+                      v{feat.version}.0
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -3,85 +3,96 @@
 @tailwind utilities;
 
 :root {
-  --background: #0f111a;
-  --foreground: #f8fafc;
-  --card: #151824;
-  --card-foreground: #f8fafc;
-  --popover: #151824;
-  --popover-foreground: #f8fafc;
-  --primary: #8b5cf6;
+  --background: #0a0a0a;
+  --foreground: #e8e8e8;
+  --card: #111111;
+  --card-foreground: #e8e8e8;
+  --popover: #111111;
+  --popover-foreground: #e8e8e8;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
+  --secondary: #161616;
+  --secondary-foreground: #e8e8e8;
+  --muted: #161616;
+  --muted-foreground: #666666;
   --accent: #2563eb;
   --accent-foreground: #ffffff;
-  --destructive: #ef4444;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #2e354f;
-  --input: #1e293b;
-  --ring: #8b5cf6;
-  --radius: 0.75rem;
+  --border: #1f1f1f;
+  --input: #111111;
+  --ring: #2563eb;
+  --radius: 4px;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   overflow-x: hidden;
 }
 
-/* Glassmorphism custom classes */
+/* Developers Layout Styling Helpers */
 .glass-panel {
-  background: rgba(21, 24, 36, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(46, 53, 79, 0.5);
+  background: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 4px;
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #111111;
+  border: 1px solid #1f1f1f;
+  border-radius: 4px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .glass-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(139, 92, 246, 0.3);
-  box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.2);
+  border-color: #3b82f6;
+  background-color: #161616;
 }
 
-/* Glow effects */
-.glow-indigo {
-  box-shadow: 0 0 40px -5px rgba(139, 92, 246, 0.15);
+/* Redefined Status helpers (flat and low-key highlight colors) */
+.glow-indigo, .glow-green, .glow-red {
+  box-shadow: none !important;
 }
 
-.glow-green {
-  box-shadow: 0 0 40px -5px rgba(34, 197, 94, 0.15);
+/* Dev Table custom styles */
+.dev-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
 }
 
-.glow-red {
-  box-shadow: 0 0 40px -5px rgba(239, 68, 68, 0.15);
+.dev-table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: #666666;
+  padding: 10px 14px;
+  border-bottom: 1px solid #1f1f1f;
+  background-color: #0f0f0f;
 }
 
-/* Animated background gradient */
-.bg-gradient-animate {
-  background: linear-gradient(-45deg, #0f111a, #151824, #120e2e, #090e1f);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
+.dev-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #1f1f1f;
+  color: #e8e8e8;
 }
 
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+.dev-table tr:nth-child(even) {
+  background-color: #0f0f0f;
+}
+
+.dev-table tr:nth-child(odd) {
+  background-color: #111111;
+}
+
+.dev-table tr:hover {
+  background-color: #161616;
+}
+
+/* JetBrains Mono overrides for tech values */
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
 }
