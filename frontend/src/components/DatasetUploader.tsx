@@ -166,7 +166,7 @@ export default function DatasetUploader({ onDiscoverTriggered, apiKey = "superse
           setStatus("completed");
         }
       } catch (pollErr) {
-        console.warning("Ingestion status poll issue:", pollErr);
+        console.warn("Ingestion status poll issue:", pollErr);
       }
     }, 2000); // Poll every 2 seconds
   };
