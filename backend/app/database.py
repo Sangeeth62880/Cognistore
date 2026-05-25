@@ -24,9 +24,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from app.config import settings
 
 # Adjust scheme for asyncpg if postgresql:// is provided instead of postgresql+asyncpg://
-db_url = settings.DATABASE_URL
+db_url = settings.DATABASE_URL.strip()
 if db_url.startswith("postgresql://"):
     db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 
 # Async engine setup
 engine = create_async_engine(
