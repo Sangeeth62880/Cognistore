@@ -1,5 +1,13 @@
 # Cognistore (Intelligent Feature Store)
 
+## 🚀 Live Deployments
+
+*   **Frontend Web Interface (Vercel)**: [https://cognistore.vercel.app/](https://cognistore.vercel.app/)
+*   **Backend API Gateway (Railway)**: [https://cognistore-production.up.railway.app/](https://cognistore-production.up.railway.app/)
+*   **API Health Diagnostics**: [https://cognistore-production.up.railway.app/health](https://cognistore-production.up.railway.app/health)
+*   **Interactive API Docs (Swagger)**: [https://cognistore-production.up.railway.app/docs](https://cognistore-production.up.railway.app/docs)
+
+
 A production-grade, highly optimized monorepo for managing, cataloging, serving, and validating machine learning features across offline training and real-time serving paths. Equipped with natural language feature synthesis, Pearson schema correlation discovery, Population Stability Index (PSI) drift monitoring, and live WebSocket latency telemetry dashboards.
 
 ## 🎨 Premium Light-Theme Interface (Cal.com Style)
