@@ -190,10 +190,11 @@ async def root_endpoint():
 
 # Health Check Endpoint
 @app.get("/health", response_model=Dict[str, Any])
-
 async def health_check():
     db_connected = False
     redis_connected = False
+    db_error = None
+    redis_error = None
 
     # Check database
     try:
@@ -204,12 +205,14 @@ async def health_check():
                 db_connected = True
     except Exception as e:
         logger.error(f"Database health check failed: {e}")
+        db_error = str(e)
 
     # Check redis
     try:
         redis_connected = await redis_client.ping()
     except Exception as e:
         logger.error(f"Redis health check failed: {e}")
+        redis_error = str(e)
 
     overall_status = "healthy"
     if not db_connected or not redis_connected:
@@ -219,5 +222,8 @@ async def health_check():
         "status": overall_status,
         "db_connected": db_connected,
         "redis_connected": redis_connected,
+        "db_error": db_error,
+        "redis_error": redis_error,
         "environment": settings.ENVIRONMENT,
     }
+
