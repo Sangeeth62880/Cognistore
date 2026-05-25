@@ -133,7 +133,7 @@ if settings.ENVIRONMENT == "development":
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=True,
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -142,10 +142,11 @@ else:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],  # Fallback for flexibility, customize in settings if needed
-        allow_credentials=True,
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
 
 app.add_middleware(LatencyTrackingMiddleware)
 
