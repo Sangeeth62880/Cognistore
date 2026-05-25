@@ -178,8 +178,19 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
     )
 
 
+@app.get("/", response_model=Dict[str, Any])
+async def root_endpoint():
+    return {
+        "status": "active",
+        "service": "Cognistore Intelligent Feature Store API",
+        "version": "1.0.0",
+        "environment": settings.ENVIRONMENT,
+    }
+
+
 # Health Check Endpoint
 @app.get("/health", response_model=Dict[str, Any])
+
 async def health_check():
     db_connected = False
     redis_connected = False
